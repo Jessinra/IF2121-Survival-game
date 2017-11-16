@@ -27,3 +27,6 @@ ex : working_directory(CWD,'c:/code/prolog/tubes').
 Modify fact 
 use : assert(<new_fact>)  // input new fact
 use : retract(<fact>)	// delete fact
+
+fix assert error
+assert -> asserta(<new_fact>)
