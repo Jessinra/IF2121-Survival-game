@@ -1,30 +1,50 @@
 
+/* Declaration of dynamic fact */
+:- dynamic game_running/1.
+game_running(false).
+
+
 init:-
-	show_title,
-	main_read,
-	main_write.
+
+	/* If game has not been run yet */	
+	game_running(false), 			
 	
+	/* Modify fact that game is running */	
+	retractall(game_running(false)),
+	asserta(game_running(true)), 
+	
+	show_title,
+	load('cache.txt'),
+	save('cache.txt').
+ 
+init:-
+
+	/* If game has already begun */
+	game_running(true),
+	write('Game has already begun !'), nl.
 	
 
 /*** ====================        SAVE AND LOAD       ======================== ***/
 
-main_read:-
+load(Filename):-
 	/* Function to load file */
 	
-	open('cache.txt', read, Stream),
+	open(Filename, read, Stream),
 
 	/* Read player data */
 	read(Stream, Health), 	 
 	read(Stream, Hunger), 	 
 	read(Stream, Thirst), 	 
 	read(Stream, Pos_x), 	
-	read(Stream, Pos_y),	 
+	read(Stream, Pos_y),	
+	read(Stream, Weapon),	
 	read(Stream, Inventory), 
 	
 	asserta(player_health(Health)),
 	asserta(player_hunger(Hunger)),
 	asserta(player_thirst(Thirst)),
 	asserta(player_pos(Pos_x, Pos_y)),
+	asserta(player_weapon(Weapon)),
 	asserta(player_inventory(Inventory)),
 	
 	
@@ -41,19 +61,21 @@ main_read:-
 	asserta(enemies(Enemies)),
 	asserta(special_terains(Special_terains)),
 	
+	write('Data successfully loaded !'), nl,
 	close(Stream).
 
 	
-main_write:-
+save(Filename):-
 	/* Function to save file */
 	
-	open('cache.txt', write, Stream),
+	open(Filename, write, Stream),
 
 	/* Gathering data */
 	player_health(Health), 
 	player_hunger(Hunger), 
 	player_thirst(Thirst), 
 	player_pos(Pos_x, Pos_y), 
+	player_weapon(Weapon),
 	player_inventory(Inventory),
 	
 	map_width(Map_width), 
@@ -68,6 +90,7 @@ main_write:-
 	write(Stream, Thirst), 			write(Stream, '.'), nl(Stream),
 	write(Stream, Pos_x), 			write(Stream, '.'), nl(Stream),
 	write(Stream, Pos_y), 			write(Stream, '.'), nl(Stream),
+	write(Stream, Weapon), 			write(Stream, '.'), nl(Stream),
 	write(Stream, Inventory), 		write(Stream, '.'), nl(Stream),
 	
 	/* Write map data */
@@ -76,9 +99,10 @@ main_write:-
 	write(Stream, Map_items), 		write(Stream, '.'), nl(Stream),
 	write(Stream, Enemies), 		write(Stream, '.'), nl(Stream),
 	write(Stream, Special_terains), write(Stream, '.'), nl(Stream),
-
+	
+	write('Save data successfully created !'), nl,
 	close(Stream).
-
+	
 
 	
 
@@ -124,8 +148,84 @@ modify_map_items:- !.
 
 modify_enemies:- !.
 	
+/*** ====================        OBJECT         ======================== ***/
+
+set_object:-
+	/* Rules to specify which category does specific items belong to */
+	
+	asserta(medicine(first_aid)),
+	asserta(medicine(bandage)),
+	asserta(medicine(pain_killer)),
+	asserta(medicine(herbs)),
+	asserta(medicine(stimulant)),
+	
+	asserta(food(canned_food)),
+	asserta(food(fruits)),
+	asserta(food(raw_meat)),
+	asserta(food(mushrooms)),
+	asserta(food(edible_plant)),
+	
+	asserta(water(bottled_water)),
+	asserta(water(clean_water)),
+	asserta(water(bottled_tea)),
+	
+	asserta(weapon(rifle)),
+	asserta(weapon(long_sword)),
+	asserta(weapon(bow_arrow)),
+	asserta(weapon(long_bow)),
+	asserta(weapon(spear)),
+	
+	asserta(other(panties)), /* #TEEHEE */
+	asserta(other(maps)),
+	asserta(other(backpack)),
+	asserta(other(pouch)),
+	asserta(other(refillable_bottle)),
+	asserta(other(empty_can)),
+	asserta(other(magic_wand)),
+	asserta(other(stick)),
+	
+	asserta(special(radar)),
+	asserta(special(tent)),
+	asserta(special(flare)).
 	
 	
+	
+/*** ====================        COMMAND        ======================== ***/	
+
+status:-
+	/* Command to show player's status */
+	
+	player_health(Health), 
+	player_hunger(Hunger), 
+	player_thirst(Thirst), 
+	player_pos(Pos_x, Pos_y),
+	player_weapon(Weapon),	
+	player_inventory(Inventory),
+
+	/* Looks messy here, but tidy in display ~ */
+	write('+========================+'), nl,
+	write('|                 STATUS                  |'), nl,
+	write('+========================+'), nl,
+	format(" Health	       : ~a~n",[Health]), 
+	format(" Hunger       : ~a~n",[Hunger]), 
+	format(" Thirst         : ~a~n",[Thirst]), 
+	format(" Weapon	    : ~a~n",[Weapon]), 
+	format(" Position     : <~a,~a> ~n",[Pos_x, Pos_y]),
+	write(' Inventory   : '), show_inventory.
+
+	
+	
+quit:-
+	/* Command to quit and exit prolog */
+	
+	save('cache.txt'),
+	write('Created auto-save data'), nl,
+	write('Exiting in : 3..'), nl, sleep(1),
+	write('2..'), nl, sleep(1),
+	write('1..'), nl, sleep(1),
+	halt.
+
+
 /*** ====================        DISPLAY        ======================== ***/	
 	
 show_title:-
@@ -145,8 +245,12 @@ show_title:-
 	write('00____00_000000000____00_______00____00______00________00____000___0000000_____00______00___00______00___00__00_00___00_____00____00___________'), nl,
 	write('00____00_00_____00____00_______00____00______00_________00____00___00____00_____00____00_____00____00____00___0000___00____00__00___00_________'), nl,
 	write('0000000__00_____00____00_______00____0000000_0000000______0000_____00_____00______0000_________0000______00____000___000000_____00000__________'), nl,
-	write('_______________________________________________________________________________________________________________________________________________').
+	write('_______________________________________________________________________________________________________________________________________________'), nl,nl,nl.
 
+	
+show_inventory:-
+	!.
+	
 show_message:-
 	!.
 

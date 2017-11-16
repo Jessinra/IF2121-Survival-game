@@ -1,8 +1,9 @@
 150.
-98.
-129.
+100.
+100.
 4.
 2.
+keyblade.
 [frying_pan,panties,jacket,ammo,ak_47].
 15.
 15.
