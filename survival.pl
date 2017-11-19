@@ -35,7 +35,7 @@ init:-
 
 	/* If game has already begun */
 	game_running(true),
-	write('Game has already begun !'), nl.
+	write('The game has already begun, keep going !!'), nl.
 	
 
 /*** ====================        SAVE AND LOAD       ======================== ***/
@@ -336,7 +336,7 @@ status:-
 	format(" Thirst       : ~p~n",[Thirst]), 
 	format(" Weapon       : ~p~n",[Weapon]), 
 	format(" Position     : <~p,~p> ~n",[Pos_x, Pos_y]),
-	format(" Inventory    : "), show_inventory.
+	 write(' Inventory    : '), show_inventory.
 
 
 quit:-
