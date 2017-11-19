@@ -25,8 +25,15 @@ https://stackoverflow.com/questions/11633181/swi-prolog-change-working-directory
 ex : working_directory(CWD,'c:/code/prolog/tubes').
 
 Modify fact 
-use : assert(<new_fact>)  // input new fact
-use : retract(<fact>)	// delete fact
+ex:
+fact(X),
+retract(fact(X)),	// delete fact
+assert(fact(New_X)).  // input new fact
+
 
 fix assert error
 assert -> asserta(<new_fact>)
+
+dynamic fact
+:- dynamic(game_running/1).
+game_running(false).

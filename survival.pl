@@ -1,21 +1,35 @@
 
-/* Declaration of dynamic fact */
-:- dynamic game_running/1.
-game_running(false).
+/*** ====================         DECLARATION OF DYNAMIC FACT     =========================== ***/
+
+:- dynamic(game_running/1).	game_running(false).
+
+:- dynamic(player_health/1).		player_health(0).
+:- dynamic(player_hunger/1).		player_hunger(0). 
+:- dynamic(player_thirst/1).		player_thirst(0). 
+:- dynamic(player_pos/2).			player_pos(0, 0). 
+:- dynamic(player_weapon/1).		player_weapon(bare_hand).
+:- dynamic(player_inventory/1).  	player_inventory([]).
+:- dynamic(map_width/1).		map_width(0). 
+:- dynamic(map_length/1).		map_length(0). 
+:- dynamic(map_items/1).		map_items(0).
+:- dynamic(enemies/1).			enemies(0).
+:- dynamic(special_terains/1).	special_terains(0).
+
+/*** ====================         MAIN FUNCITON     =========================== ***/
 
 
 init:-
 
 	/* If game has not been run yet */	
-	game_running(false), 			
+	game_running(false), !,			
 	
 	/* Modify fact that game is running */	
-	retractall(game_running(false)),
+	retract(game_running(false)),
 	asserta(game_running(true)), 
 	
 	show_title,
-	load('cache.txt'),
-	save('cache.txt').
+	load_game('cache.txt'),
+	save_game('cache.txt').
  
 init:-
 
@@ -26,46 +40,71 @@ init:-
 
 /*** ====================        SAVE AND LOAD       ======================== ***/
 
-load(Filename):-
+load_game(Filename):-
 	/* Function to load file */
 	
 	open(Filename, read, Stream),
 
+	player_health(Health), 
+	player_hunger(Hunger), 
+	player_thirst(Thirst), 
+	player_pos(Pos_x, Pos_y), 
+	player_weapon(Weapon),
+	player_inventory(Inventory),
+	
+	retract(player_health(Health)),
+	retract(player_hunger(Hunger)),
+	retract(player_thirst(Thirst)),
+	retract(player_pos(Pos_x, Pos_y)),
+	retract(player_weapon(Weapon)),
+	retract(player_inventory(Inventory)),
+	
 	/* Read player data */
-	read(Stream, Health), 	 
-	read(Stream, Hunger), 	 
-	read(Stream, Thirst), 	 
-	read(Stream, Pos_x), 	
-	read(Stream, Pos_y),	
-	read(Stream, Weapon),	
-	read(Stream, Inventory), 
+	read(Stream, New_Health), 	 
+	read(Stream, New_Hunger), 	 
+	read(Stream, New_Thirst), 	 
+	read(Stream, New_Pos_x), 	
+	read(Stream, New_Pos_y),	
+	read(Stream, New_Weapon),	
+	read(Stream, New_Inventory), 
 	
-	asserta(player_health(Health)),
-	asserta(player_hunger(Hunger)),
-	asserta(player_thirst(Thirst)),
-	asserta(player_pos(Pos_x, Pos_y)),
-	asserta(player_weapon(Weapon)),
-	asserta(player_inventory(Inventory)),
+	asserta(player_health(New_Health)),
+	asserta(player_hunger(New_Hunger)),
+	asserta(player_thirst(New_Thirst)),
+	asserta(player_pos(New_Pos_x, New_Pos_y)),
+	asserta(player_weapon(New_Weapon)),
+	asserta(player_inventory(New_Inventory)),
 	
+	map_width(Map_width), 
+	map_length(Map_length), 
+	map_items(Map_items),
+	enemies(Enemies),
+	special_terains(Special_terains),
+
+	retract(map_width(Map_width)),
+	retract(map_length(Map_length)),
+	retract(map_items(Map_items)),
+	retract(enemies(Enemies)),
+	retract(special_terains(Special_terains)),
 	
 	/* Read map data */
-	read(Stream, Map_width),    	
-    read(Stream, Map_length),	
-	read(Stream, Map_items),		
-	read(Stream, Enemies),			
-	read(Stream, Special_terains),	
+	read(Stream, New_Map_width),    	
+    read(Stream, New_Map_length),	
+	read(Stream, New_Map_items),		
+	read(Stream, New_Enemies),			
+	read(Stream, New_Special_terains),	
 
-	asserta(map_width(Map_width)),
-	asserta(map_length(Map_length)),
-	asserta(map_items(Map_items)),
-	asserta(enemies(Enemies)),
-	asserta(special_terains(Special_terains)),
+	asserta(map_width(New_Map_width)),
+	asserta(map_length(New_Map_length)),
+	asserta(map_items(New_Map_items)),
+	asserta(enemies(New_Enemies)),
+	asserta(special_terains(New_Special_terains)),
 	
 	write('Data successfully loaded !'), nl,
 	close(Stream).
 
 	
-save(Filename):-
+save_game(Filename):-
 	/* Function to save file */
 	
 	open(Filename, write, Stream),
@@ -141,10 +180,25 @@ modify_player_position(Change_X, Change_Y):-
 	NY is Y + Change_Y,
 	asserta(player_pos(NX, NY)).
 
+modify_player_weapon(New_weapon):- 
+	/* rules to change player thirst */
 	
-modify_inventory:- !.
+	player_thirst(X),
+	retract(player_weapon(X)),
+	asserta(player_weapon(New_weapon)).
 	
-modify_map_items:- !.
+modify_inventory(New_inventory):- 
+	/* rules to change inventory */
+	player_inventory(Y),
+	retract(player_inventory(Y)),
+	asserta(player_inventory(New_inventory)).
+	
+modify_map_items(New_map_items):-
+	/* rules to change items on map */
+	map_items(C),
+	retract(map_items(C)),
+	asserta(map_items(New_map_items)).
+	
 
 modify_enemies:- !.
 	
@@ -175,7 +229,7 @@ set_object:-
 	asserta(weapon(long_bow)),
 	asserta(weapon(spear)),
 	
-	asserta(other(panties)), /* #TEEHEE */
+	asserta(other(panties)),
 	asserta(other(maps)),
 	asserta(other(backpack)),
 	asserta(other(pouch)),
@@ -188,10 +242,81 @@ set_object:-
 	asserta(special(tent)),
 	asserta(special(flare)).
 	
-	
+
+/*** ====================       PENGUBAHAN INVENTORY       ======================== ***/
+
+addObj([], C, [C]) :- !.
+addObj([A|B], C, [A|D]) :- addObj(B, C, D).
+
+delObj([], _, []) :- !.
+delObj([A|B], C, B) :- C == A, !.
+delObj([A|B], C, [A|D]) :- C \== A, delObj(B, C, D).
+
+schObj([], _, 0) :- !.
+schObj([A|_], C, X) :- A == C, !, X is 1.
+schObj([A|B], C, X) :- A \== C, schObj(B, C, X).	
 	
 /*** ====================        COMMAND        ======================== ***/	
 
+
+take(X) :- 
+	player_pos(A,B),
+	map_items(C),
+	schObj(C, [X,A,B], D), /* Cek apakah barang tersebut posisinya sama dengan player */
+	D is 1,
+	player_inventory(Y),
+	addObj(Y, X, Z),
+	modify_inventory(Z),
+	delObj(C, [X,A,B], E),
+	modify_map_items(E).
+	
+drop(X) :- 
+	player_pos(A,B),
+	map_items(C),
+	player_inventory(Y),
+	schObj(Y, X, D), /* Cek apakah barang tersebut ada di inventory */
+	D is 1,
+	delObj(Y, X, Z),
+	modify_inventory(Z),
+	addObj(C, [X,A,B], E),
+	modify_map_items(E).
+	
+use(X) :-
+	food(X),
+	player_inventory(Y),
+	schObj(Y, X, D), /* Cek apakah barang tersebut ada di inventory */
+	D is 1, !,
+	delObj(Y, X, Z),
+	modify_inventory(Z),
+	modify_player_hunger(50). /* NILAI MUNGKIN BERUBAH */
+
+use(X) :-
+	medicine(X),
+	player_inventory(Y),
+	schObj(Y, X, D), /* Cek apakah barang tersebut ada di inventory */
+	D is 1, !,
+	delObj(Y, X, Z),
+	modify_inventory(Z),
+	modify_player_health(50). /* NILAI MUNGKIN BERUBAH */
+	
+use(X) :-
+	water(X),
+	player_inventory(Y),
+	schObj(Y, X, D), /* Cek apakah barang tersebut ada di inventory */
+	D is 1, !,
+	delObj(Y, X, Z),
+	modify_inventory(Z),
+	modify_player_thirst(50). /* NILAI MUNGKIN BERUBAH */
+	
+use(X) :-
+	weapon(X),
+	player_inventory(Y),
+	schObj(Y, X, D), /* Cek apakah barang tersebut ada di inventory */
+	D is 1, !,
+	delObj(Y, X, Z),
+	modify_inventory(Z),
+	modify_player_weapon(X). 
+	
 status:-
 	/* Command to show player's status */
 	
@@ -206,19 +331,18 @@ status:-
 	write('+========================+'), nl,
 	write('|                 STATUS                  |'), nl,
 	write('+========================+'), nl,
-	format(" Health	       : ~a~n",[Health]), 
+	format(" Health       : ~a~n",[Health]),
 	format(" Hunger       : ~a~n",[Hunger]), 
 	format(" Thirst         : ~a~n",[Thirst]), 
-	format(" Weapon	    : ~a~n",[Weapon]), 
+	format(" Weapon     : ~a~n",[Weapon]), 
 	format(" Position     : <~a,~a> ~n",[Pos_x, Pos_y]),
 	write(' Inventory   : '), show_inventory.
 
-	
-	
+
 quit:-
 	/* Command to quit and exit prolog */
 	
-	save('cache.txt'),
+	save_game('cache.txt'),
 	write('Created auto-save data'), nl,
 	write('Exiting in : 3..'), nl, sleep(1),
 	write('2..'), nl, sleep(1),
