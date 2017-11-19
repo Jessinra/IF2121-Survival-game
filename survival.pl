@@ -183,7 +183,7 @@ modify_player_position(Change_X, Change_Y):-
 modify_player_weapon(New_weapon):- 
 	/* rules to change player thirst */
 	
-	player_thirst(X),
+	player_weapon(X),
 	retract(player_weapon(X)),
 	asserta(player_weapon(New_weapon)).
 	
@@ -327,16 +327,16 @@ status:-
 	player_weapon(Weapon),	
 	player_inventory(Inventory),
 
-	/* Looks messy here, but tidy in display ~ */
+
 	write('+========================+'), nl,
-	write('|                 STATUS                  |'), nl,
+	write('|        STATUS          |'), nl,
 	write('+========================+'), nl,
-	format(" Health       : ~a~n",[Health]),
-	format(" Hunger       : ~a~n",[Hunger]), 
-	format(" Thirst         : ~a~n",[Thirst]), 
-	format(" Weapon     : ~a~n",[Weapon]), 
-	format(" Position     : <~a,~a> ~n",[Pos_x, Pos_y]),
-	write(' Inventory   : '), show_inventory.
+	format(" Health       : ~p~n",[Health]),
+	format(" Hunger       : ~p~n",[Hunger]), 
+	format(" Thirst       : ~p~n",[Thirst]), 
+	format(" Weapon       : ~p~n",[Weapon]), 
+	format(" Position     : <~p,~p> ~n",[Pos_x, Pos_y]),
+	format(" Inventory    : "), show_inventory.
 
 
 quit:-
