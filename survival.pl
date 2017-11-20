@@ -29,6 +29,8 @@ init:-
 	
 	show_title,
 	load_game('cache.txt'),
+
+	set_object,
 	save_game('cache.txt').
  
 init:-
@@ -37,6 +39,9 @@ init:-
 	game_running(true),
 	write('Game has already begun !'), nl.
 	
+
+
+
 
 /*** ====================        SAVE AND LOAD       ======================== ***/
 
@@ -143,8 +148,6 @@ save_game(Filename):-
 	close(Stream).
 	
 
-	
-
 /*** ====================        MODIFY FACT       ======================== ***/	
 
 modify_player_health(Change):- 
@@ -228,22 +231,46 @@ set_object:-
 	asserta(weapon(bow_arrow)),
 	asserta(weapon(long_bow)),
 	asserta(weapon(spear)),
-	
-	asserta(other(panties)),
+
+	/* Set object value as fact */
+
+	asserta(other(cloth)),
 	asserta(other(maps)),
 	asserta(other(backpack)),
 	asserta(other(pouch)),
-	asserta(other(refillable_bottle)),
+	asserta(other(empty_bottle)),
 	asserta(other(empty_can)),
 	asserta(other(magic_wand)),
 	asserta(other(stick)),
 	
 	asserta(special(radar)),
-	asserta(special(tent)),
-	asserta(special(flare)).
-	
+	asserta(special(barrier)),
+	asserta(special(flare)),
 
-/*** ====================       PENGUBAHAN INVENTORY       ======================== ***/
+	asserta(stataddition(first_aid,100)), 
+	asserta(stataddition(bandage,70)),
+	asserta(stataddition(pain_killer,40)),
+	asserta(stataddition(herbs,20)),
+	asserta(stataddition(stimulant,10)),
+	
+	asserta(stataddition(canned_food,100)),
+	asserta(stataddition(fruits,70)),
+	asserta(stataddition(raw_meat,40)),
+	asserta(stataddition(mushrooms,20)),
+	asserta(stataddition(edible_plant,10)),
+	
+	asserta(stataddition(bottled_water,100)),
+	asserta(stataddition(clean_water,70)),
+	asserta(stataddition(bottled_tea,40)),
+
+	asserta(weapon_atk(rifle, 37)),
+	asserta(weapon_atk(long_sword, 29)),
+	asserta(weapon_atk(bow_arrow, 22)),
+	asserta(weapon_atk(long_bow, 31)),
+	asserta(weapon_atk(spear, 24)).
+
+
+/*** ====================       CHANGE INVENTORY       ======================== ***/
 
 addObj([], C, [C]) :- !.
 addObj([A|B], C, [A|D]) :- addObj(B, C, D).
@@ -255,67 +282,159 @@ delObj([A|B], C, [A|D]) :- C \== A, delObj(B, C, D).
 schObj([], _, 0) :- !.
 schObj([A|_], C, X) :- A == C, !, X is 1.
 schObj([A|B], C, X) :- A \== C, schObj(B, C, X).	
+
+print_inventory(Inventory):-
+	Inventory = [], !.
+
+print_inventory(Inventory):-
+	[Head|Tail] = Inventory,
+	format(" -  ~p \n", [Head]),
+	print_inventory(Tail).
+
 	
+/***  ========================      INITIATE PLAYER        ======================== ***/
+
+%initPlayer:-random(1,15,X),random(1,15,Y),/*look_pos(X,Y)*/,!,initPlayer.
+%initPlayer:-random(1,15,X),random(1,15,Y),asserta(player_pos(X,Y,)).
+	
+
+get_terain_position([]):- !.
+get_terain_position([Head | Tail]) :- [_,Terain_x, Terain_y] = Head , asserta(pos_terrains(Terain_x,Terain_y)),get_terain_position(Tail).  
+
+get_enemy([]):- !.
+get_enemy([Head|Tail]):- [H,AE,X,Y] = Head , asserta(enemy(H,AE,X,Y)),get_enemy(Tail).
+
+
+/***  ========================      MOVE          ======================== ***/
+
+n:- player_pos(Pos_X,Pos_Y), Pos_Y\==15 ,Pos_Z is Pos_Y+1,pos_terrains(Terain_x,Terain_y),Pos_Z==Terain_y,Pos_X==Terain_x,!,write('cant move there\n'),nl.
+n:- player_pos(Pos_X,Pos_Y), Pos_Y\==15 ,Pos_Z is Pos_Y+1,retract(player_pos(Pos_X,Pos_Y)),asserta(player_pos(Pos_X,Pos_Z)).
+
+e:- player_pos(Pos_X,Pos_Y), Pos_X\==1 ,Pos_Z is Pos_X+1,pos_terrains(Terain_x,Terain_y),Pos_Y==Terain_y,Pos_Z==Terain_x,!,write('cant move there\n'),nl.
+e:- player_pos(Pos_X,Pos_Y), Pos_X\==1 ,Pos_Z is Pos_X+1,retract(player_pos(Pos_X,Pos_Y)),asserta(player_pos(Pos_Z,Pos_Y)).
+
+w:- player_pos(Pos_X,Pos_Y), Pos_X\==15 ,Pos_Z is Pos_X-1,pos_terrains(Terain_x,Terain_y),Pos_Y==Terain_y,Pos_Z==Terain_x,!,write('cant move there\n'),nl.
+w:- player_pos(Pos_X,Pos_Y), Pos_X\==15 ,Pos_Z is Pos_X-1,retract(player_pos(Pos_X,Pos_Y)),asserta(player_pos(Pos_Z,Pos_Y)).
+
+\s:- player_pos(Pos_X,Pos_Y), Pos_Y\==1 ,Pos_Z is Pos_Y-1 ,pos_terrains(Terain_x,Terain_y),Pos_Z==Terain_y,Pos_X==Terain_x,!,write('cant move there\n'),nl.
+\s:- player_pos(Pos_X,Pos_Y), Pos_Y\==1 ,Pos_Z is Pos_Y-1 ,retract(player_pos(Pos_X,Pos_Y)),asserta(player_pos(Pos_X,Pos_Z)).
+
+
+/***  ========================       ATTACK        ======================== ***/
+
+%player:- player_health(H),player_hunger(Hu),player_thirst(T),player_pos(Pos_X,Pos_Y),player_weapon(W),player_inventory(I),asserta(player(H,Hu,T,Pos_X,Pos_Y,W,I)).
+
+/*
+attack:- player(H,Hu,T,Pos_X,Pos_Y,W,I) W=:= 1,enemy(HE,AE,Pos_X,Pos_Y),retract(H,Hu,T,Pos_X,Pos_Y,W,I),retract(enemy(HE,AE,Pos_X,Pos_Y)),
+		   F is H - AE , HA is W - HE , HE\==0, write ('you get attacked '),asserta(player(F,Hu,T,Pos_X,Pos_Y,W,I)),asserta(enemy(HA,AE,Pos_X,Pos_Y))).
+
+attack:- player(H,Hu,T,Pos_X,Pos_Y,W,I) W=:= 1,enemy(HE,AE,Pos_X,Pos_Y),retract(H,Hu,T,Pos_X,Pos_Y,W,I),retract(enemy(HE,AE,Pos_X,Pos_Y)),
+		   F is H - AE , HA is W - HE , HE==0, write ('an enemy killed '),asserta(player(F,Hu,T,Pos_X,Pos_Y,W,I)),asserta(enemy(HA,AE,Pos_X,Pos_Y))).
+
+attack :- player(_,_,_,_,_,_,W,_), W =:= 1, write('No more enemy to attack in this place').
+
+attack :- write('you\'re not using any weapon').
+
+*/
+
 /*** ====================        COMMAND        ======================== ***/	
 
+map:-
+	!.
 
-take(X) :- 
-	player_pos(A,B),
-	map_items(C),
-	schObj(C, [X,A,B], D), /* Cek apakah barang tersebut posisinya sama dengan player */
-	D == 1,
-	player_inventory(Y),
-	addObj(Y, X, Z),
-	modify_inventory(Z),
-	delObj(C, [X,A,B], E),
-	modify_map_items(E).
-	
-drop(X) :- 
-	player_pos(A,B),
-	map_items(C),
-	player_inventory(Y),
-	schObj(Y, X, D), /* Cek apakah barang tersebut ada di inventory */
-	D == 1,
-	delObj(Y, X, Z),
-	modify_inventory(Z),
-	addObj(C, [X,A,B], E),
-	modify_map_items(E).
-	
-use(X) :-
-	food(X),
-	player_inventory(Y),
-	schObj(Y, X, D), /* Cek apakah barang tersebut ada di inventory */
-	D == 1, !,
-	delObj(Y, X, Z),
-	modify_inventory(Z),
-	modify_player_hunger(50). /* NILAI MUNGKIN BERUBAH */
+look:-
+	!.
 
-use(X) :-
-	medicine(X),
-	player_inventory(Y),
-	schObj(Y, X, D), /* Cek apakah barang tersebut ada di inventory */
-	D == 1, !,
-	delObj(Y, X, Z),
-	modify_inventory(Z),
-	modify_player_health(50). /* NILAI MUNGKIN BERUBAH */
 	
-use(X) :-
-	water(X),
-	player_inventory(Y),
-	schObj(Y, X, D), /* Cek apakah barang tersebut ada di inventory */
-	D == 1, !,
-	delObj(Y, X, Z),
-	modify_inventory(Z),
-	modify_player_thirst(50). /* NILAI MUNGKIN BERUBAH */
+take(Object) :- 
+	player_pos(A,B),
+	map_items(Oldmapitems),
+	schObj(Oldmapitems, [Object,A,B], D), /* Cek apakah barang tersebut posisinya sama dengan player */
+	D == 1,
+	player_inventory(OldInventory),
+	addObj(OldInventory, Object, NewInventory),
+	modify_inventory(NewInventory),
+	delObj(Oldmapitems, [Object,A,B], NewMapItems),
+	modify_map_items(NewMapItems),
+	format("~p has been taken from this area.", [Object]), !.
 	
-use(X) :-
-	weapon(X),
-	player_inventory(Y),
-	schObj(Y, X, D), /* Cek apakah barang tersebut ada di inventory */
+take(Object) :- 
+	player_pos(A,B),
+	map_items(Oldmapitems),
+	schObj(Oldmapitems, [Object,A,B], D), /* Cek apakah barang tersebut posisinya sama dengan player */
+	D \== 1, !,
+	format("~p was not found in this area.", [Object]), !.
+	
+drop(Object) :- 
+	player_pos(A,B),
+	map_items(Oldmapitems),
+	player_inventory(OldInventory),
+	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
+	D == 1,
+	delObj(OldInventory, Object, NewInventory),
+	modify_inventory(NewInventory),
+	addObj(Oldmapitems, [Object,A,B], NewMapItems),
+	modify_map_items(NewMapItems),
+	format("You dropped ~p in this area.", [Object]), !.
+	
+drop(Object) :- 
+
+	player_inventory(OldInventory),
+	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
+	D \== 1, !,
+	format("You don't have ~p in your inventory.", [Object]), !.
+	
+use(Object) :-
+	food(Object),
+	stataddition(Object, Addition),
+	player_inventory(OldInventory),
+	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
 	D == 1, !,
-	delObj(Y, X, Z),
-	modify_inventory(Z),
-	modify_player_weapon(X). 
+	delObj(OldInventory, Object, NewInventory),
+	modify_inventory(NewInventory),
+	modify_player_hunger(Addition), /* NILAI MUNGKIN BERUBAH */
+	format("You eat ~p. ", [Object]),
+	format("Your hunger raised by ~p. ", [Addition]).
+
+use(Object) :-
+	medicine(Object),
+	stataddition(Object, Addition),
+	player_inventory(OldInventory),
+	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
+	D == 1, !,
+	delObj(OldInventory, Object, NewInventory),
+	modify_inventory(NewInventory),
+	modify_player_health(Addition), /* NILAI MUNGKIN BERUBAH */
+	format("You used ~p. ", [Object]),
+	format("Your health raised by ~p. ", [Addition]).
+	
+use(Object) :-
+	water(Object),
+	stataddition(Object, Addition),
+	player_inventory(OldInventory),
+	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
+	D == 1, !,
+	delObj(OldInventory, Object, NewInventory),
+	modify_inventory(NewInventory),
+	modify_player_thirst(Addition), /* NILAI MUNGKIN BERUBAH */
+	format("You drink ~p. ", [Object]),
+	format("Your thirst raised by ~p. ", [Addition]).
+	
+use(Object) :-
+	weapon(Object),
+	player_inventory(OldInventory),
+	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
+	D == 1, !,
+	delObj(OldInventory, Object, NewInventory),
+	modify_inventory(NewInventory),
+	modify_player_weapon(Object),
+	format("You wield ~p right now.", [Object]).
+	
+use(Object) :-
+	player_inventory(OldInventory),
+	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
+	D \== 1, !,
+	format("You don't have ~p in your inventory.", [Object]).
 	
 status:-
 	/* Command to show player's status */
@@ -325,7 +444,6 @@ status:-
 	player_thirst(Thirst), 
 	player_pos(Pos_x, Pos_y),
 	player_weapon(Weapon),	
-	player_inventory(Inventory),
 
 
 	write('+========================+'), nl,
@@ -336,7 +454,7 @@ status:-
 	format(" Thirst       : ~p~n",[Thirst]), 
 	format(" Weapon       : ~p~n",[Weapon]), 
 	format(" Position     : <~p,~p> ~n",[Pos_x, Pos_y]),
-	 write(' Inventory    : '), show_inventory.
+	 write(' Inventory    : '),nl, show_inventory.
 
 
 quit:-
@@ -371,15 +489,51 @@ show_title:-
 	write('@@@@@@@  @@     @@    @@       @@    @@@@@@@ @@@@@@@      @@@@     @@     @@      @@@@         @@@@      @@    @@@   @@@@@@     @@@@@          '), nl,
 	write('                                                                                                                                               '), nl,nl,nl.
 
-	
+
 show_inventory:-
-	!.
-	
+	player_inventory(Inventory),
+	print_inventory(Inventory).
+
+
 show_message:-
 	!.
 
-show_help:-
-	!.
+manual:-
+	game_running(false),
+	write('How about calling init. to start the game ? :) '),nl,nl,!.
+
+manual:-
+	/* Rules to show help */
+
+	nl,nl,
+	write('Opening manual book....'), nl,nl,
+	write('Objective : Elminate all but yourself'), nl,nl,
+	write('Available actions :'), nl,
+	write('save(filename).    | Create save data of your current game'), nl,
+	write('load(filename).    | Load save data from your previous game'), nl,
+	write('manual.            | Cmon, you should know by now...'), nl,nl,
+
+	write('look.              | Take a look at surounding ~ '), nl,
+	write('n. s. e. w.        | Move one step toward the future '), nl,
+	write('map.               | Display full map (only if you have radar though...'), nl,nl,
+
+	write('take(object).      | Pick a(n) item from ground'), nl,
+	write('drop(object).      | Drop a(n) item to the ground'), nl,
+	write('use(object).       | Consume a(n) item'), nl,
+
+	write('attack.            | Attack an enemy nearby'), nl,
+	write('status.            | Display current status'), nl,nl,
+
+	write('Map\'s legends:'),nl,
+	write('M = medicine'),nl,
+	write('F = food'),nl,
+	write('W = water'),nl,
+	write('# = weapon'),nl,
+	write('P = you'),nl,
+	write('- = accessible'),nl,
+	write('X = inaccessible'),nl.
+
+
 	
 /*** ====================       STORAGE       ======================== ***/
 
@@ -394,3 +548,4 @@ printall(Data):-
 	[Head|Tail] = Data,
 	write(Head),write(' '),
 	printall(Tail).
+
