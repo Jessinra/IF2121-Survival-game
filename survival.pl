@@ -31,6 +31,7 @@ init:-
 	load_game('cache.txt'),
 
 	set_object,
+	init_world,
 	save_game('cache.txt').
  
 init:-
@@ -39,9 +40,134 @@ init:-
 	game_running(true),
 	write('Game has already begun !'), nl.
 	
+/*** ==============================       MAP     ================================== ***/
 
+world_width(15).
+world_height(10).
 
+/** ~~~~~~~~~~~~~~~~~ initializing ~~~~~~~~~~~~~~~~~**/
 
+init_world:-
+	/* Rules to generate plain map */
+	world_height(WH),
+	init_world_row(WH).
+
+init_world_row(Row):-
+	Row == 0, !.
+	
+init_world_row(Row):-
+	world_width(WD),
+	create_plain_world(Row, 1, WD),!,
+	New_row is Row -1, 
+	init_world_row(New_row).
+
+create_plain_world(_,_,Span):-
+	Span == 0, !.
+	
+create_plain_world(Row, Col, Span):-
+
+	world_height(WH), Row =< WH,
+	world_width(WD), Col =< WD,
+	
+	New_row is Row,
+	New_col is Col + 1,
+	New_span is Span - 1,
+
+	asserta(world(plain, Row, Col)),!,
+	
+	create_plain_world(New_row, New_col, New_span),!.	
+	
+/**~~~~~~~~~~~~~~~~~ Create custom world ~~~~~~~~~~~~~~~~~**/
+
+create_world(_,_,_,Span,_):-
+	Span == 0, !.
+	
+create_world(_, Row, _, _, _):-
+	world_height(WH), Row > WH,
+	write('The world is inbalanced,... dimensional overflow !'),nl.
+	
+create_world(_, _, Col, _, _):-
+	world_width(WD), Col > WD,
+	write('The world is inbalanced,... dimensional overflow !'),nl.
+	
+create_world(Type, Row, Col, Span, Is_row):-
+	/*
+	type : what kind of terain
+	row : starting row
+	col : starting col
+	span : how many tiles spanning
+	is_row : span to which direction ? true -> span row -> downward | false -> span col -> rightward 
+	*/
+
+	world_height(WH), Row =< WH,
+	world_width(WD), Col =< WD,
+	
+	\+ Is_row,
+	New_row is Row,
+	New_col is Col + 1,
+	New_span is Span - 1,
+	
+	world(C_Type, Row, Col),
+	retract(world(C_Type, Row, Col)),
+	asserta(world(Type, Row, Col)),!,
+	
+	create_world(Type, New_row, New_col, New_span, Is_row),!.
+	
+create_world(Type, Row, Col, Span, Is_row):-
+	/*
+	type : what kind of terain
+	row : starting row
+	col : starting col
+	span : how many tiles spanning
+	is_row : span to which direction ? true -> span row -> downward | false -> span col -> rightward 
+	*/
+	
+	world_height(WH), Row =< WH,
+	world_width(WD), Col =< WD,
+
+	Is_row,
+	New_row is Row + 1,
+	New_col is Col,
+	New_span is Span - 1,
+	
+	world(C_Type, Row, Col),
+	retract(world(C_Type, Row, Col)),
+	asserta(world(Type, Row, Col)),!,
+	
+	create_world(Type, New_row, New_col, New_span, Is_row),!.
+	
+/**~~~~~~~~~~~~~~~~~ Displaying map ~~~~~~~~~~~~~~~~~**/
+
+print_map_symbol(X,Y):-
+	/* Printing map elemetn as symbol */
+	world(Type,X,Y),!,
+	format(" ~p ",[Type]).
+	
+print_whole_map(Row, Col):-
+
+	world_width(WD),
+	world_height(WH),
+	Row == WH, 
+	Col == WD, !,
+	print_map_symbol(Row, Col),
+	!.
+
+print_whole_map(Row, Col):-
+
+	world_width(WD),
+	print_map_symbol(Row,Col),
+	
+	Col < WD,
+	New_col is Col + 1, !,
+	print_whole_map(Row, New_col).
+	
+print_whole_map(Row, Col):-
+
+	world_width(WD),
+	
+	Col == WD, nl,
+	New_row is Row + 1, !,
+	print_whole_map(New_row, 1).
 
 /*** ====================        SAVE AND LOAD       ======================== ***/
 
@@ -307,43 +433,58 @@ get_enemy([Head|Tail]):- [H,AE,X,Y] = Head , asserta(enemy(H,AE,X,Y)),get_enemy(
 
 /***  ========================      MOVE          ======================== ***/
 
-n:- player_pos(Pos_X,Pos_Y), Pos_Y\==15 ,Pos_Z is Pos_Y+1,pos_terrains(Terain_x,Terain_y),Pos_Z==Terain_y,Pos_X==Terain_x,!,write('cant move there\n'),nl.
-n:- player_pos(Pos_X,Pos_Y), Pos_Y\==15 ,Pos_Z is Pos_Y+1,retract(player_pos(Pos_X,Pos_Y)),asserta(player_pos(Pos_X,Pos_Z)).
 
-e:- player_pos(Pos_X,Pos_Y), Pos_X\==1 ,Pos_Z is Pos_X+1,pos_terrains(Terain_x,Terain_y),Pos_Y==Terain_y,Pos_Z==Terain_x,!,write('cant move there\n'),nl.
-e:- player_pos(Pos_X,Pos_Y), Pos_X\==1 ,Pos_Z is Pos_X+1,retract(player_pos(Pos_X,Pos_Y)),asserta(player_pos(Pos_Z,Pos_Y)).
+%n:- player_pos(Pos_X,Pos_Y), Pos_Y\==15 ,Pos_Z is Pos_Y+1,pos_terrains(Terain_x,Terain_y),Pos_Z==Terain_y,Pos_X==Terain_x,!,write('cant move there\n'),nl.
+%n:- player_pos(Pos_X,Pos_Y), Pos_Y\==15 ,Pos_Z is Pos_Y+1,retract(player_pos(Pos_X,Pos_Y)),asserta(player_pos(Pos_X,Pos_Z)).
 
-w:- player_pos(Pos_X,Pos_Y), Pos_X\==15 ,Pos_Z is Pos_X-1,pos_terrains(Terain_x,Terain_y),Pos_Y==Terain_y,Pos_Z==Terain_x,!,write('cant move there\n'),nl.
-w:- player_pos(Pos_X,Pos_Y), Pos_X\==15 ,Pos_Z is Pos_X-1,retract(player_pos(Pos_X,Pos_Y)),asserta(player_pos(Pos_Z,Pos_Y)).
+%e:- player_pos(Pos_X,Pos_Y), Pos_X\==1 ,Pos_Z is Pos_X+1,pos_terrains(Terain_x,Terain_y),Pos_Y==Terain_y,Pos_Z==Terain_x,!,write('cant move there\n'),nl.
+%e:- player_pos(Pos_X,Pos_Y), Pos_X\==1 ,Pos_Z is Pos_X+1,retract(player_pos(Pos_X,Pos_Y)),asserta(player_pos(Pos_Z,Pos_Y)).
 
-\s:- player_pos(Pos_X,Pos_Y), Pos_Y\==1 ,Pos_Z is Pos_Y-1 ,pos_terrains(Terain_x,Terain_y),Pos_Z==Terain_y,Pos_X==Terain_x,!,write('cant move there\n'),nl.
-\s:- player_pos(Pos_X,Pos_Y), Pos_Y\==1 ,Pos_Z is Pos_Y-1 ,retract(player_pos(Pos_X,Pos_Y)),asserta(player_pos(Pos_X,Pos_Z)).
+%w:- player_pos(Pos_X,Pos_Y), Pos_X\==15 ,Pos_Z is Pos_X-1,pos_terrains(Terain_x,Terain_y),Pos_Y==Terain_y,Pos_Z==Terain_x,!,write('cant move there\n'),nl.
+%w:- player_pos(Pos_X,Pos_Y), Pos_X\==15 ,Pos_Z is Pos_X-1,retract(player_pos(Pos_X,Pos_Y)),asserta(player_pos(Pos_Z,Pos_Y)).
+
+%s:- player_pos(Pos_X,Pos_Y), Pos_Y\==1 ,Pos_Z is Pos_Y-1 ,pos_terrains(Terain_x,Terain_y),Pos_Z==Terain_y,Pos_X==Terain_x,!,write('cant move there\n'),nl.
+%s:- player_pos(Pos_X,Pos_Y), Pos_Y\==1 ,Pos_Z is Pos_Y-1 ,retract(player_pos(Pos_X,Pos_Y)),asserta(player_pos(Pos_X,Pos_Z)).
+
 
 
 /***  ========================       ATTACK        ======================== ***/
 
+
 %player:- player_health(H),player_hunger(Hu),player_thirst(T),player_pos(Pos_X,Pos_Y),player_weapon(W),player_inventory(I),asserta(player(H,Hu,T,Pos_X,Pos_Y,W,I)).
 
-/*
-attack:- player(H,Hu,T,Pos_X,Pos_Y,W,I) W=:= 1,enemy(HE,AE,Pos_X,Pos_Y),retract(H,Hu,T,Pos_X,Pos_Y,W,I),retract(enemy(HE,AE,Pos_X,Pos_Y)),
-		   F is H - AE , HA is W - HE , HE\==0, write ('you get attacked '),asserta(player(F,Hu,T,Pos_X,Pos_Y,W,I)),asserta(enemy(HA,AE,Pos_X,Pos_Y))).
 
-attack:- player(H,Hu,T,Pos_X,Pos_Y,W,I) W=:= 1,enemy(HE,AE,Pos_X,Pos_Y),retract(H,Hu,T,Pos_X,Pos_Y,W,I),retract(enemy(HE,AE,Pos_X,Pos_Y)),
-		   F is H - AE , HA is W - HE , HE==0, write ('an enemy killed '),asserta(player(F,Hu,T,Pos_X,Pos_Y,W,I)),asserta(enemy(HA,AE,Pos_X,Pos_Y))).
+%attack:- player(H,Hu,T,Pos_X,Pos_Y,W,I) W=:= 1,enemy(HE,AE,Pos_X,Pos_Y),retract(H,Hu,T,Pos_X,Pos_Y,W,I),retract(enemy(HE,AE,Pos_X,Pos_Y)),
+%		   F is H - AE , HA is W - HE , HE\==0, write ('you get attacked '),asserta(player(F,Hu,T,Pos_X,Pos_Y,W,I)),asserta(enemy(HA,AE,Pos_X,Pos_Y))).
 
-attack :- player(_,_,_,_,_,_,W,_), W =:= 1, write('No more enemy to attack in this place').
+%attack:- player(H,Hu,T,Pos_X,Pos_Y,W,I) W=:= 1,enemy(HE,AE,Pos_X,Pos_Y),retract(H,Hu,T,Pos_X,Pos_Y,W,I),retract(enemy(HE,AE,Pos_X,Pos_Y)),
+%		   F is H - AE , HA is W - HE , HE==0, write ('an enemy killed '),asserta(player(F,Hu,T,Pos_X,Pos_Y,W,I)),asserta(enemy(HA,AE,Pos_X,Pos_Y))).
 
-attack :- write('you\'re not using any weapon').
+%attack :- player(_,_,_,_,_,_,W,_), W =:= 1, write('No more enemy to attack in this place').
 
-*/
+%attack :- write('you\'re not using any weapon').
+
 
 /*** ====================        COMMAND        ======================== ***/	
 
 map:-
-	!.
+	print_whole_map(1, 1).
 
 look:-
-	!.
+	/* Rules to look surounding */
+	
+	player_pos(Pos_x, Pos_y),
+	X1 is Pos_x - 1, Y1 is Pos_y - 1, print_map_symbol(X1,Y1),
+	X2 is Pos_x + 0, Y2 is Pos_y - 1, print_map_symbol(X2,Y2),
+	X3 is Pos_x + 1, Y3 is Pos_y - 1, print_map_symbol(X3,Y3),
+	nl,
+	X4 is Pos_x - 1, Y4 is Pos_y + 0, print_map_symbol(X4,Y4),
+	write(' you '),
+	X6 is Pos_x + 1, Y6 is Pos_y + 0, print_map_symbol(X6,Y6),
+	nl,
+	X7 is Pos_x - 1, Y7 is Pos_y + 1, print_map_symbol(X7,Y7),
+	X8 is Pos_x + 0, Y8 is Pos_y + 1, print_map_symbol(X8,Y8),
+	X9 is Pos_x + 1, Y9 is Pos_y + 1, print_map_symbol(X9,Y9).
 
 	
 take(Object) :- 
