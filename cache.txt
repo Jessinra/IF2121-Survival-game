@@ -1,12 +1,12 @@
 220.
 100.
 100.
-4.
-2.
+5.
+5.
 bare_hands.
-[riffle,long_sword,long_bow,first_aid,herbs,herbs,void_bomb].
+[riffle,long_sword,long_bow,first_aid,herbs,herbs,void_bomb,radar,first_aid].
 15.
 15.
-[[first_aid,5,10],[long_bow,12,8],[bandage,4,15]].
-[[33,2,5],[27,4,5],[55,2,8],[35,12,8]].
+[[first_aid,5,10],[long_bow,12,8],[bandage,4,15],[bandage,4,15],[pain_killer,3,5],[herbs,2,2],[stimulant,1,4],[canned_food,9,9],[fruits,7,9],[bottled_water,13,11],[clean_water,13,9],[bottled_tea,14,8]].
+[[27,4,7],[55,4,8],[35,12,7],[33,2,6]].
 [[lake,4,5],[lake,4,6],[lake,4,7],[lake,3,5],[lake,3,6]].
