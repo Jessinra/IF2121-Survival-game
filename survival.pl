@@ -1,4 +1,5 @@
 
+
 /*** ====================         DECLARATION OF DYNAMIC FACT     =========================== ***/
 
 :- dynamic(game_running/1).	game_running(false).
@@ -31,8 +32,12 @@ init:-
 	load_game('cache.txt'),
 
 	set_object,
-	init_world,
-	save_game('cache.txt').
+	init_world, create_border,
+	init_item_on_map,
+	init_enemy_on_map,
+	save_game('cache.txt'),
+	
+	test.
  
 init:-
 
@@ -42,8 +47,8 @@ init:-
 	
 /*** ==============================       MAP     ================================== ***/
 
-world_width(15).
-world_height(10).
+world_width(25).
+world_height(15).
 
 /** ~~~~~~~~~~~~~~~~~ initializing ~~~~~~~~~~~~~~~~~**/
 
@@ -76,6 +81,7 @@ create_plain_world(Row, Col, Span):-
 	asserta(world(plain, Row, Col)),!,
 	
 	create_plain_world(New_row, New_col, New_span),!.	
+	
 	
 /**~~~~~~~~~~~~~~~~~ Create custom world ~~~~~~~~~~~~~~~~~**/
 
@@ -136,13 +142,70 @@ create_world(Type, Row, Col, Span, Is_row):-
 	
 	create_world(Type, New_row, New_col, New_span, Is_row),!.
 	
+create_border:-
+	world_width(WD),
+	world_height(WH),
+	create_world(border, 1,1,WD,false),
+	create_world(border, 1,1,WH,true),
+	create_world(border, WH,1,WD,false),
+	create_world(border, 1,WD,WH,true).
+	
+	
 /**~~~~~~~~~~~~~~~~~ Displaying map ~~~~~~~~~~~~~~~~~**/
 
-print_map_symbol(X,Y):-
+
+print_map_symbol(Row, Col):-
+	/* Printing enemy  as symbol */
+	enemy_on_map(_,Row,Col),!,
+	format('  <!>  ',[]).
+	
+print_map_symbol(Row, Col):-
+	/* Printing medicine  as symbol */
+	item_on_map(Item,Row,Col),
+	medicine(Item),!,
+	format(' - M - ',[]).
+	
+print_map_symbol(Row, Col):-
+	/* Printing food  as symbol */
+	item_on_map(Item,Row,Col),
+	food(Item),!,
+	format(' - F - ',[]).
+	
+print_map_symbol(Row, Col):-
+	/* Printing water (drink) as symbol */
+	item_on_map(Item,Row,Col),
+	water(Item),!,
+	format(' - D - ',[]).
+	
+print_map_symbol(Row, Col):-
+	/* Printing weapon  as symbol */
+	item_on_map(Item,Row,Col),
+	weapon(Item),!,
+	format(' - W - ',[]).
+	
+print_map_symbol(Row, Col):-
+	/* Printing your location as symbol */
+	player_pos(Pos_y, Pos_x),
+	Row == Pos_y,
+	Col == Pos_x,!,
+	format('  you  ',[]).
+	
+print_map_symbol(Row, Col):-
+	/* Printing border as symbol */
+	world(border, Row, Col),!,
+	format('  -#-  ',[]).
+	
+print_map_symbol(Row, Col):-
+	/* Printing plain map as symbol */
+	world(plain, Row, Col),!,
+	format('  ___  ',[]).
+	
+print_map_symbol(Row, Col):-
 	/* Printing map elemetn as symbol */
-	world(Type,X,Y),!,
+	world(Type, Row, Col),!,
 	format(" ~p ",[Type]).
 	
+
 print_whole_map(Row, Col):-
 
 	world_width(WD),
@@ -165,7 +228,7 @@ print_whole_map(Row, Col):-
 
 	world_width(WD),
 	
-	Col == WD, nl,
+	Col == WD, nl, nl,
 	New_row is Row + 1, !,
 	print_whole_map(New_row, 1).
 
@@ -328,8 +391,39 @@ modify_map_items(New_map_items):-
 	retract(map_items(C)),
 	asserta(map_items(New_map_items)).
 	
+/*** ====================        ENEMIES         ======================== ***/
 
-modify_enemies:- !.
+set_enemies([A1,B1,X1,Y1],C,D) :-
+	random(10,30,E),
+	random_enemy([A1,B1,X1,Y1],C,E,D).
+	
+random_enemy([],[],0,_) :- !.
+random_enemy([A1,B1,X1,Y1],C,E,D) :- 
+
+	random(150,250,A),
+	random(15,25,B), 
+	random(1,15,X), 
+	random(1,15,Y), 
+	(sublist([_,_,X,Y],C)),
+	random_enemy([A,B,X,Y],C,E,D); 
+	append([A,B,X,Y],C,D), 
+	E1 is E-1, 
+	random_enemy([A1,B1,X1,Y1],C,E1,D).
+	
+	
+init_enemy_on_map:-
+	enemies(Enemies),
+	set_enemy_on_map(Enemies).
+
+set_enemy_on_map(Enemies):-
+	Enemies == [], !.
+
+set_enemy_on_map(Enemies):-
+	[Head|Tail] = Enemies,
+	[Atk, Row, Col] = Head,
+	
+	asserta(enemy_on_map(Atk, Row, Col)),
+	set_enemy_on_map(Tail).
 	
 /*** ====================        OBJECT         ======================== ***/
 
@@ -352,7 +446,7 @@ set_object:-
 	asserta(water(clean_water)),
 	asserta(water(bottled_tea)),
 	
-	asserta(weapon(rifle)),
+	asserta(weapon(riffle)),
 	asserta(weapon(long_sword)),
 	asserta(weapon(bow_arrow)),
 	asserta(weapon(long_bow)),
@@ -372,33 +466,45 @@ set_object:-
 	asserta(special(radar)),
 	asserta(special(barrier)),
 	asserta(special(flare)),
+	asserta(special(void_bomb)),
 
-	asserta(stataddition(first_aid,100)), 
-	asserta(stataddition(bandage,70)),
+	asserta(stataddition(first_aid,20)), 
+	asserta(stataddition(bandage,25)),
 	asserta(stataddition(pain_killer,40)),
-	asserta(stataddition(herbs,20)),
-	asserta(stataddition(stimulant,10)),
+	asserta(stataddition(herbs,15)),
+	asserta(stataddition(stimulant,25)),
 	
-	asserta(stataddition(canned_food,100)),
-	asserta(stataddition(fruits,70)),
-	asserta(stataddition(raw_meat,40)),
-	asserta(stataddition(mushrooms,20)),
-	asserta(stataddition(edible_plant,10)),
+	asserta(stataddition(canned_food,40)),
+	asserta(stataddition(fruits,15)),
+	asserta(stataddition(raw_meat,35)),
+	asserta(stataddition(mushrooms,10)),
+	asserta(stataddition(edible_plant,15)),
 	
-	asserta(stataddition(bottled_water,100)),
-	asserta(stataddition(clean_water,70)),
-	asserta(stataddition(bottled_tea,40)),
-
-	asserta(weapon_atk(rifle, 37)),
-	asserta(weapon_atk(long_sword, 29)),
-	asserta(weapon_atk(bow_arrow, 22)),
-	asserta(weapon_atk(long_bow, 31)),
-	asserta(weapon_atk(spear, 24)).
+	asserta(stataddition(bottled_water,40)),
+	asserta(stataddition(clean_water,60)),
+	asserta(stataddition(bottled_tea,25)).
 
 
+init_item_on_map:-
+	map_items(Items),
+	set_item_on_map(Items).
+
+set_item_on_map(Items):-
+	Items == [], !.
+
+set_item_on_map(Items):-
+	[Head|Tail] = Items,
+	[Item_name, Row, Col] = Head,
+	
+	asserta(item_on_map(Item_name, Row, Col)),
+	set_item_on_map(Tail).
+	
+	
 /*** ====================       CHANGE INVENTORY       ======================== ***/
 
-addObj([], C, [C]) :- !.
+addObj([], C, [C]):-
+	!.
+	
 addObj([A|B], C, [A|D]) :- addObj(B, C, D).
 
 delObj([], _, []) :- !.
@@ -468,23 +574,24 @@ get_enemy([Head|Tail]):- [H,AE,X,Y] = Head , asserta(enemy(H,AE,X,Y)),get_enemy(
 /*** ====================        COMMAND        ======================== ***/	
 
 map:-
+	nl,
 	print_whole_map(1, 1).
 
 look:-
 	/* Rules to look surounding */
 	
-	player_pos(Pos_x, Pos_y),
-	X1 is Pos_x - 1, Y1 is Pos_y - 1, print_map_symbol(X1,Y1),
-	X2 is Pos_x + 0, Y2 is Pos_y - 1, print_map_symbol(X2,Y2),
-	X3 is Pos_x + 1, Y3 is Pos_y - 1, print_map_symbol(X3,Y3),
+	player_pos(Row, Col),
+	Col1 is Col - 1, Row1 is Row - 1, print_map_symbol(Row1,Col1),
+	Col2 is Col + 0, Row2 is Row - 1, print_map_symbol(Row2,Col2),
+	Col3 is Col + 1, Row3 is Row - 1, print_map_symbol(Row3,Col3),
 	nl,
-	X4 is Pos_x - 1, Y4 is Pos_y + 0, print_map_symbol(X4,Y4),
-	write(' you '),
-	X6 is Pos_x + 1, Y6 is Pos_y + 0, print_map_symbol(X6,Y6),
+	Col4 is Col - 1, Row4 is Row + 0, print_map_symbol(Row4,Col4),
+	print_map_symbol(Row, Col),
+	Col6 is Col + 1, Row6 is Row + 0, print_map_symbol(Row6,Col6),
 	nl,
-	X7 is Pos_x - 1, Y7 is Pos_y + 1, print_map_symbol(X7,Y7),
-	X8 is Pos_x + 0, Y8 is Pos_y + 1, print_map_symbol(X8,Y8),
-	X9 is Pos_x + 1, Y9 is Pos_y + 1, print_map_symbol(X9,Y9).
+	Col7 is Col - 1, Row7 is Row + 1, print_map_symbol(Row7,Col7),
+	Col8 is Col + 0, Row8 is Row + 1, print_map_symbol(Row8,Col8),
+	Col9 is Col + 1, Row9 is Row + 1, print_map_symbol(Row9,Col9).
 
 	
 take(Object) :- 
@@ -576,7 +683,64 @@ use(Object) :-
 	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
 	D \== 1, !,
 	format("You don't have ~p in your inventory.", [Object]).
+
 	
+store:-
+	/* Used to store current weapon into inventory */
+
+	player_weapon(Current_weapon),
+	player_inventory(OldInventory),
+	addObj(OldInventory, Current_weapon, NewInventory),
+	modify_inventory(NewInventory),
+	modify_player_weapon(bare_hands),
+	format("You stored your ~p, let's hope the best..", [Current_weapon]).
+
+
+	
+void_bomb:-
+	/* Rule to use void_bomb, remove all enemy around player */
+
+	player_inventory(OldInventory),
+	schObj(OldInventory, void_bomb, D), D == 0,!,
+	
+	write('What are you trying to do ? '),nl.
+	
+void_bomb:-
+	/* Rule to use void_bomb, remove all enemy around player */
+
+	player_inventory(OldInventory),
+	schObj(OldInventory, void_bomb, D), D == 1,
+	
+	write('A R E   Y O U   S U R E  ???'),nl,
+	write(' <yes / no> : '), read(Input), Input == yes,!,
+	
+	\+ activate_bomb,!,
+	delObj(OldInventory, void_bomb, NewInventory),
+	modify_inventory(NewInventory),
+	
+	write('BOOOMMM !!!!..'), nl, sleep(1),
+	write('..'), nl, sleep(1),
+	write('..'), nl, sleep(1),
+	write('You opened your eyes slowly, and you realized suddenly everything\'s gone...').
+	
+void_bomb:-
+	/* Rule to use void_bomb, remove all enemy around player */
+
+	player_inventory(OldInventory),
+	schObj(OldInventory, void_bomb, D), D == 1,
+	
+	write('Good choice,... better save it for later use...').
+
+activate_bomb:-
+	
+	player_pos(Row, Col),
+	enemy_on_map(ERow, ECol),
+	abs(ERow - Row) =< 1,
+	abs(ECol - Col) =< 1,
+	retract(enemy_on_map(ERow,ECol)),fail.
+	
+	
+
 status:-
 	/* Command to show player's status */
 	
@@ -690,3 +854,4 @@ printall(Data):-
 	write(Head),write(' '),
 	printall(Tail).
 
+:- include(test).
