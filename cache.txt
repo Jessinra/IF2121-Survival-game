@@ -1,12 +1,12 @@
-120.
+220.
 100.
 100.
 4.
 2.
-keyblade.
-[frying_pan,panties,jacket,ammo,ak_47].
+bare_hands.
+[riffle,long_sword,long_bow,first_aid,herbs,herbs,void_bomb].
 15.
 15.
-[[med_kit,5,10],[gun,12,8],[bandage,4,15]].
-[[250,rifle,2,5],[150,lance,4,5],[250,lance,2,8],[150,lance,12,8]].
+[[first_aid,5,10],[long_bow,12,8],[bandage,4,15]].
+[[33,2,5],[27,4,5],[55,2,8],[35,12,8]].
 [[lake,4,5],[lake,4,6],[lake,4,7],[lake,3,5],[lake,3,6]].
