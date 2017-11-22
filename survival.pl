@@ -3,6 +3,8 @@
 /*** ====================         DECLARATION OF DYNAMIC FACT     =========================== ***/
 
 :- dynamic(game_running/1).	game_running(false).
+:- dynamic(game_type_set/1). game_type_set(false).
+:- dynamic(game_initialized/1). game_initialized(false).
 
 :- dynamic(player_health/1).		player_health(0).
 :- dynamic(player_hunger/1).		player_hunger(0). 

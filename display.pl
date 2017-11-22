@@ -40,6 +40,7 @@ manual:-
 	write('Available actions :'), nl,
 	write('save(filename).    | Create save data of your current game'), nl,
 	write('load(filename).    | Load save data from your previous game'), nl,
+	write('quit.              | Quit without saving'), nl,
 	write('manual.            | Cmon, you should know by now...'), nl,nl,
 
 	write('look.              | Take a look at surounding ~ '), nl,
@@ -49,18 +50,21 @@ manual:-
 	write('take(object).      | Pick a(n) item from ground'), nl,
 	write('drop(object).      | Drop a(n) item to the ground'), nl,
 	write('use(object).       | Consume a(n) item'), nl,
-
+	write('store.             | Store your weapon and go YOLO'), nl,
+	write('void_bomb.         | ??? '), nl,
 	write('attack.            | Attack an enemy nearby'), nl,
 	write('status.            | Display current status'), nl,nl,
 
 	write('Map\'s legends:'),nl,
-	write('M = medicine'),nl,
-	write('F = food'),nl,
-	write('W = water'),nl,
-	write('# = weapon'),nl,
-	write('P = you'),nl,
-	write('- = accessible'),nl,
-	write('X = inaccessible'),nl.
+	write(' <!>  = enemy'),nl,nl,
+	write('- M - = medicine'),nl,
+	write('- F - = food'),nl,
+	write('- D - = drink'),nl,
+	write('- W - = weapon'),nl,nl,
+	write(' ___  = accessible'),nl,
+	write('- # - = inaccessible'),nl,nl,
+	
+	generate_enemy_movement,!.
 
 
 map:-
@@ -236,3 +240,30 @@ print_whole_map(Row, Col):-
 	Col == WD, nl, nl,
 	New_row is Row + 1, !,
 	print_whole_map(New_row, 1).
+	
+	
+	
+show_you_died:-
+	nl,nl,nl,nl,nl,
+	write('     8. 8888.      ,8   ,o888888o.     8 8888      88           8 888888888o.       8 8888 8 8888888888   8 888888888o.      '),nl,
+	write('      8. 8888.    ,8 . 8888      88.   8 8888      88           8 8888     ^888.    8 8888 8 8888         8 8888     ^888.   '),nl,
+	write('       8. 8888.  ,8 ,8 8888        8b  8 8888      88           8 8888         88.  8 8888 8 8888         8 8888         88. '),nl,
+ 	write('       8. 8888.,8   88 8888         8b 8 8888      88           8 8888          88  8 8888 8 8888         8 8888          88 '),nl,
+	write('         8. 88888   88 8888         88 8 8888      88           8 8888          88  8 8888 8 888888888888 8 8888          88 '),nl,
+	write('          8. 8888   88 8888         88 8 8888      88           8 8888          88  8 8888 8 8888         8 8888          88 '),nl,
+	write('           8 8888   88 8888        ,8P 8 8888      88           8 8888         ,88  8 8888 8 8888         8 8888         ,88 '),nl,
+	write('           8 8888    8 8888       ,8P    8888     ,8P           8 8888        ,88   8 8888 8 8888         8 8888        ,88  '),nl,
+	write('           8 8888      8888     ,88      8888   ,d8P            8 8888    ,o88P     8 8888 8 8888         8 8888    ,o88P    '),nl,
+	write('           8 8888        8888888P          Y88888P              8 888888888P        8 8888 8 888888888888 8 888888888P       '),nl,nl,nl,nl.
+
+show_congratulation:-
+
+	nl,nl,nl,nl,nl,
+write('     ######   #######  ##    ##  ######   ########     ###    ######## ##     ## ##          ###    ######## ####  #######  ##    ##  ######      '),nl,
+write('    ##    ## ##     ## ###   ## ##    ##  ##     ##   ## ##      ##    ##     ## ##         ## ##      ##     ##  ##     ## ###   ## ##    ##     '),nl,
+write('    ##       ##     ## ####  ## ##        ##     ##  ##   ##     ##    ##     ## ##        ##   ##     ##     ##  ##     ## ####  ## ##           '),nl,
+write('    ##       ##     ## ## ## ## ##   #### ########  ##     ##    ##    ##     ## ##       ##     ##    ##     ##  ##     ## ## ## ##  ######      '),nl,
+write('    ##       ##     ## ##  #### ##    ##  ##   ##   #########    ##    ##     ## ##       #########    ##     ##  ##     ## ##  ####       ##     '),nl,
+write('    ##    ## ##     ## ##   ### ##    ##  ##    ##  ##     ##    ##    ##     ## ##       ##     ##    ##     ##  ##     ## ##   ### ##    ##     '),nl,
+write('     ######   #######  ##    ##  ######   ##     ## ##     ##    ##     #######  ######## ##     ##    ##    ####  #######  ##    ##  ######      '),nl,nl,nl.
+	

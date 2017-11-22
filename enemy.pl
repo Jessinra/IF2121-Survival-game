@@ -49,11 +49,10 @@ set_enemy_on_map(Enemies):-
 generate_enemy_movement:-
 	enemy_on_map(EAtk,Pos_row,Pos_col),
 	random(1,6,M),
-	moveenemy(M, EAtk, Pos_row, Pos_col).
+	moveenemy(M, EAtk, Pos_row, Pos_col),fail.
 	
-	
-	
-	
+generate_enemy_movement:-
+	!.
 	
 	
 moveenemy(M, EAtk, Pos_row, Pos_col):- 

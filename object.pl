@@ -227,7 +227,8 @@ take(Object) :-
 	
 	retract(item_on_map(Object,A,B)),
 	
-	format("~p has been taken from this area.", [Object]), !.
+	format("~p has been taken from this area.", [Object]), 
+	generate_enemy_movement,!.
 	
 take(Object) :- 
 	/* rules to take a(n) object from map into inventory -- if not found case */
@@ -237,7 +238,8 @@ take(Object) :-
 	schObj(Oldmapitems, [Object,A,B], D), /* Cek apakah barang tersebut posisinya sama dengan player */
 	D \== 1, !,
 	
-	format("~p was not found in this area.", [Object]), !.
+	format("~p was not found in this area.", [Object]), 
+	generate_enemy_movement,!.
 	
 drop(Object) :- 
 	/* rule to drop a(n) object to map  -- if found case */
@@ -256,7 +258,8 @@ drop(Object) :-
 	
 	asserta(item_on_map(Object, A, B)),
 	
-	format("You dropped ~p in this area.", [Object]), !.
+	format("You dropped ~p in this area.", [Object]), 
+	generate_enemy_movement,!.
 	
 drop(Object) :- 
 	/* rule to drop a(n) object to map  -- if not found case */
@@ -265,11 +268,17 @@ drop(Object) :-
 	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
 	D \== 1, !,
 	
-	format("You don't have ~p in your inventory.", [Object]), !.
+	format("You don't have ~p in your inventory.", [Object]),
+	generate_enemy_movement,!.
+
+use(_) :-
+	/* rule to use object -- basis */
+	\+player_weapon(bare_hands),!,
+	write('My hand\'s full, maybe I should store my weapon first'),nl.
 	
 use(Object) :-
 	/* rule to eat object */
-
+	player_weapon(bare_hands),
 	food(Object),
 	stataddition(Object, Addition),
 	player_inventory(OldInventory),
@@ -280,11 +289,12 @@ use(Object) :-
 	modify_inventory(NewInventory),
 	modify_player_hunger(Addition), /* NILAI MUNGKIN BERUBAH */
 	format("You ate the ~p. ", [Object]),
-	format("Your hunger raised by ~p. ", [Addition]).
+	format("Your hunger raised by ~p. ", [Addition]),
+	generate_enemy_movement,!.
 
 use(Object) :-
 	/* rule to use object */
-
+	player_weapon(bare_hands),
 	medicine(Object),
 	stataddition(Object, Addition),
 	player_inventory(OldInventory),
@@ -295,7 +305,8 @@ use(Object) :-
 	modify_inventory(NewInventory),
 	modify_player_health(Addition), /* NILAI MUNGKIN BERUBAH */
 	format("You used ~p. ", [Object]),
-	format("Your health raised by ~p. ", [Addition]).
+	format("Your health raised by ~p. ", [Addition]),
+	generate_enemy_movement,!.
 	
 use(Object) :-
 	/* rule to drink object */
@@ -310,7 +321,8 @@ use(Object) :-
 	modify_inventory(NewInventory),
 	modify_player_thirst(Addition), /* NILAI MUNGKIN BERUBAH */
 	format("You drank ~p. ", [Object]),
-	format("Your thirst raised by ~p. ", [Addition]).
+	format("Your thirst raised by ~p. ", [Addition]),
+	generate_enemy_movement,!.
 	
 use(Object) :-
 	/* rule to equip weapon */
@@ -323,7 +335,8 @@ use(Object) :-
 	delObj(OldInventory, Object, NewInventory),
 	modify_inventory(NewInventory),
 	modify_player_weapon(Object),
-	format("You wield ~p right now.", [Object]).
+	format("You wield ~p right now.", [Object]),
+	generate_enemy_movement,!.
 	
 use(Object) :-
 	/* trying to use non-existent item */
@@ -332,7 +345,8 @@ use(Object) :-
 	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
 	D \== 1, !,
 	
-	format("Sadly you don't have ~p in your inventory.", [Object]).
+	format("Sadly you don't have ~p in your inventory.", [Object]),
+	generate_enemy_movement,!.
 
 	
 store:-
@@ -343,7 +357,8 @@ store:-
 	addObj(OldInventory, Current_weapon, NewInventory),
 	modify_inventory(NewInventory),
 	modify_player_weapon(bare_hands),
-	format("You stored your ~p, let's hope the best..", [Current_weapon]).
+	format("You stored your ~p, let's hope the best..", [Current_weapon]),
+	generate_enemy_movement,!.
 
 
 	
@@ -353,7 +368,8 @@ void_bomb:-
 	player_inventory(OldInventory),
 	schObj(OldInventory, void_bomb, D), D == 0,!,
 	
-	write('What are you trying to do ? '),nl.
+	write('What are you trying to do ? '),nl,
+	generate_enemy_movement,!.
 	
 void_bomb:-
 	/* Rule to use void_bomb, remove all enemy around player */
@@ -371,7 +387,8 @@ void_bomb:-
 	write('BOOOMMM !!!!..'), nl, sleep(1),
 	write('..'), nl, sleep(1),
 	write('..'), nl, sleep(1),
-	write('You opened your eyes slowly, and you realized suddenly everything\'s gone...').
+	write('You opened your eyes slowly, and you realized suddenly everything\'s gone...'),
+	generate_enemy_movement,!.
 	
 void_bomb:-
 	/* Rule to use void_bomb, remove all enemy around player */
@@ -379,7 +396,8 @@ void_bomb:-
 	player_inventory(OldInventory),
 	schObj(OldInventory, void_bomb, D), D == 1,
 	
-	write('Good choice,... better save it for later use...').
+	write('Good choice,... better save it for later use...'),
+	generate_enemy_movement,!.
 
 activate_bomb:-
 	

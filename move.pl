@@ -16,8 +16,11 @@ w:-
 	player_pos(Pos_row, Pos_col),
 	Pos_new is Pos_col - 1,
 	world(border, Pos_row, Pos_new),!,
-	write('cant move there\n'),nl,
-	generate_enemy_movement.
+	write('Seems I can\'t move there....\n'),nl,
+	modify_player_hunger(-1),
+	modify_player_thirst(-1),
+	generate_enemy_movement,
+	check_game_condition.
 	
 w:- 
 	/* command to move left */
@@ -26,7 +29,10 @@ w:-
 	Pos_new is Pos_col - 1,
 	retract(player_pos(Pos_row,Pos_col)),
 	asserta(player_pos(Pos_row,Pos_new)),
-	generate_enemy_movement.
+	modify_player_hunger(-1),
+	modify_player_thirst(-1),
+	generate_enemy_movement,
+	check_game_condition.
 
 n:- 
 	/* command to move up */
@@ -34,8 +40,11 @@ n:-
 	player_pos(Pos_row, Pos_col),
 	Pos_new is Pos_row - 1,
 	world(border, Pos_new, Pos_col),!,
-	write('cant move there\n'),nl,
-	generate_enemy_movement.
+	write('Seems I can\'t move there....\n'),nl,
+	modify_player_hunger(-1),
+	modify_player_thirst(-1),
+	generate_enemy_movement,
+	check_game_condition.
 
 n:- 
 	/* command to move up */
@@ -44,7 +53,10 @@ n:-
 	Pos_new is Pos_row - 1,
 	retract(player_pos(Pos_row,Pos_col)),
 	asserta(player_pos(Pos_new,Pos_col)),
-	generate_enemy_movement.
+	modify_player_hunger(-1),
+	modify_player_thirst(-1),
+	generate_enemy_movement,
+	check_game_condition.
 	
 e:- 
 	/* command to move right */
@@ -52,8 +64,11 @@ e:-
 	player_pos(Pos_row, Pos_col),
 	Pos_new is Pos_col + 1,
 	world(border, Pos_row, Pos_new),!,
-	write('cant move there\n'),nl,
-	generate_enemy_movement.
+	write('Seems I can\'t move there....\n'),nl,
+	modify_player_hunger(-1),
+	modify_player_thirst(-1),
+	generate_enemy_movement,
+	check_game_condition.
  
 e:- 
 	/* command to move right */
@@ -62,7 +77,10 @@ e:-
 	Pos_new is Pos_col + 1,
 	retract(player_pos(Pos_row,Pos_col)),
 	asserta(player_pos(Pos_row,Pos_new)),
-	generate_enemy_movement.
+	modify_player_hunger(-1),
+	modify_player_thirst(-1),
+	generate_enemy_movement,
+	check_game_condition.
 
 s:- 
 	/* command to move down */
@@ -70,8 +88,11 @@ s:-
 	player_pos(Pos_row, Pos_col),
 	Pos_new is Pos_row + 1,
 	world(border, Pos_new, Pos_col),!,
-	write('cant move there\n'),nl,
-	generate_enemy_movement.
+	write('Seems I can\'t move there....\n'),nl,
+	modify_player_hunger(-1),
+	modify_player_thirst(-1),
+	generate_enemy_movement,
+	check_game_condition.
 	
 s:- 
 	/* command to move down */
@@ -80,4 +101,7 @@ s:-
 	Pos_new is Pos_row + 1,
 	retract(player_pos(Pos_row,Pos_col)),
 	asserta(player_pos(Pos_new,Pos_col)),
-	generate_enemy_movement.
+	modify_player_hunger(-1),
+	modify_player_thirst(-1),
+	generate_enemy_movement,
+	check_game_condition.
