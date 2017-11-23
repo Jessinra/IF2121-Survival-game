@@ -215,9 +215,11 @@ take(Object) :-
 	player_pos(A,B),
 	map_items(Oldmapitems),
 	player_inventory(OldInventory),
+	amount(inventory, _, Max_inventory),
 	schObj(Oldmapitems, [Object,A,B], D), /* Cek apakah barang tersebut posisinya sama dengan player */
 	D == 1,
 	
+	inv_count(OldInventory, X), X < Max_inventory,
 	
 	addObj(OldInventory, Object, NewInventory),
 	modify_inventory(NewInventory),
@@ -230,6 +232,19 @@ take(Object) :-
 	format("~p has been taken from this area.", [Object]), 
 	generate_enemy_movement,!.
 	
+take(Object) :- 
+	/* rules to take a(n) object from map into inventory -- if found case*/
+	
+	player_pos(A,B),
+	map_items(Oldmapitems),
+	player_inventory(OldInventory),
+	amount(inventory, _, Max_inventory),
+	schObj(Oldmapitems, [Object,A,B], D), /* Cek apakah barang tersebut posisinya sama dengan player */
+	D == 1,
+	
+	inv_count(OldInventory, X), X == Max_inventory,
+	write('Your inventory is full!.'), !.
+
 take(Object) :- 
 	/* rules to take a(n) object from map into inventory -- if not found case */
 	
@@ -275,15 +290,32 @@ use(_) :-
 	/* rule to use object -- basis */
 	\+player_weapon(bare_hands),!,
 	write('My hand\'s full, maybe I should store my weapon first'),nl.
-	
+
 use(Object) :-
-	/* rule to eat object */
+	/* rule to eat object, Case 1 : Full */
 	player_weapon(bare_hands),
 	food(Object),
-	stataddition(Object, Addition),
 	player_inventory(OldInventory),
 	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
-	D == 1, !,
+	D == 1,
+	
+	player_hunger(Hunger),
+	amount(player_hunger, _, Max_hunger),
+	Hunger > Max_hunger, !,
+	write('You are already full!').
+	
+use(Object) :-
+	/* rule to eat object, Case 2 : Really Hungry */
+	player_weapon(bare_hands),
+	food(Object),
+	player_inventory(OldInventory),
+	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
+	D == 1,
+	stataddition(Object, Addition),
+	
+	player_hunger(Hunger),
+	amount(player_hunger, _, Max_hunger),
+	Hunger + Addition =< Max_hunger, !,
 	
 	delObj(OldInventory, Object, NewInventory),
 	modify_inventory(NewInventory),
@@ -293,13 +325,51 @@ use(Object) :-
 	generate_enemy_movement,!.
 
 use(Object) :-
-	/* rule to use object */
+	/* rule to eat object, Case 3 : Not really hungry */
 	player_weapon(bare_hands),
-	medicine(Object),
-	stataddition(Object, Addition),
+	food(Object),
 	player_inventory(OldInventory),
 	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
-	D == 1, !,
+	D == 1,
+	
+	stataddition(Object, Addition),
+	player_hunger(Hunger),
+	amount(player_hunger, _, Max_hunger),
+	Hunger + Addition > Max_hunger, !,
+	MinAdd is Max_hunger - Hunger,
+	
+	delObj(OldInventory, Object, NewInventory),
+	modify_inventory(NewInventory),
+	modify_player_hunger(MinAdd), /* NILAI MUNGKIN BERUBAH */
+	format("You ate the ~p. ", [Object]),
+	format("Your hunger raised by ~p. ", [MinAdd]),
+	generate_enemy_movement,!.
+
+use(Object) :-
+	/* rule to use object, Case 1 : Don't need to use medicine */
+	player_weapon(bare_hands),
+	medicine(Object),
+	player_inventory(OldInventory),
+	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
+	D == 1,
+	
+	amount(player_hp, _, Max_hp),
+	player_health(Health),
+	Health >= Max_hp, !,
+	write('You are healthy already!').
+	
+use(Object) :-
+	/* rule to use object, Case 2 : Hurt */
+	player_weapon(bare_hands),
+	medicine(Object),
+	player_inventory(OldInventory),
+	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
+	D == 1,
+	
+	stataddition(Object, Addition),
+	player_health(Health),
+	amount(player_hp, _, Max_hp),
+	Health + Addition =< Max_hp, !,
 	
 	delObj(OldInventory, Object, NewInventory),
 	modify_inventory(NewInventory),
@@ -309,13 +379,53 @@ use(Object) :-
 	generate_enemy_movement,!.
 	
 use(Object) :-
-	/* rule to drink object */
-
-	water(Object),
-	stataddition(Object, Addition),
+	/* rule to use object, Case 3 : Scratch */
+	player_weapon(bare_hands),
+	medicine(Object),
 	player_inventory(OldInventory),
 	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
-	D == 1, !,
+	D == 1,
+	
+	stataddition(Object, Addition),
+	player_health(Health),
+	amount(player_hp, _, Max_hp),
+	Health + Addition > Max_hp, !,
+	
+	MinAdd is Max_hp - Health,
+	
+	delObj(OldInventory, Object, NewInventory),
+	modify_inventory(NewInventory),
+	modify_player_health(MinAdd), /* NILAI MUNGKIN BERUBAH */
+	format("You used ~p. ", [Object]),
+	format("Your health raised by ~p. ", [MinAdd]),
+	generate_enemy_movement,!.
+	
+use(Object) :-
+	/* rule to drink object, Case 1 : Not thirsty*/
+
+	water(Object),
+	player_inventory(OldInventory),
+	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
+	D == 1,
+	
+	player_thirst(Thirst),
+	amount(player_thirst, _, Max_thirst),
+	Thirst >= Max_thirst, !,
+	
+	write('You are not thirsty.').
+
+use(Object) :-
+	/* rule to drink object, Case 2 : you are thirsty */
+
+	water(Object),
+	player_inventory(OldInventory),
+	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
+	D == 1,
+	
+	stataddition(Object, Addition),
+	player_thirst(Thirst),
+	amount(player_thirst, _, Max_thirst),
+	Thirst + Addition =< Max_thirst, !,
 	
 	delObj(OldInventory, Object, NewInventory),
 	modify_inventory(NewInventory),
@@ -323,7 +433,29 @@ use(Object) :-
 	format("You drank ~p. ", [Object]),
 	format("Your thirst raised by ~p. ", [Addition]),
 	generate_enemy_movement,!.
+
+use(Object) :-
+	/* rule to drink object, Case 3 : Drink as intermezzo */
+
+	water(Object),
+	player_inventory(OldInventory),
+	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
+	D == 1,
 	
+	stataddition(Object, Addition),
+	player_thirst(Thirst),
+	amount(player_thirst, _, Max_thirst),
+	Thirst + Addition >= Max_thirst, !,
+	
+	MinAdd is Max_thirst - Thirst,
+	
+	delObj(OldInventory, Object, NewInventory),
+	modify_inventory(NewInventory),
+	modify_player_thirst(MinAdd), /* NILAI MUNGKIN BERUBAH */
+	format("You drank ~p. ", [Object]),
+	format("Your thirst raised by ~p. ", [MinAdd]),
+	generate_enemy_movement,!.
+
 use(Object) :-
 	/* rule to equip weapon */
 

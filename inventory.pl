@@ -20,3 +20,6 @@ print_inventory(Inventory):-
 	[Head|Tail] = Inventory,
 	format(" -  ~p \n", [Head]),
 	print_inventory(Tail).
+	
+inv_count([], X) :- X is 0, !.
+inv_count([_|B], X) :- inv_count(B, Y), X is Y + 1.
