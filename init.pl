@@ -11,8 +11,12 @@ amount(special, 7, 13).
 amount(enemy, 20, 30).
 amount(enemy_atk, 17, 51).
 amount(player_init_hp, 150, 200).
-amount(player_init_hunger, 150, 200).
-amount(player_init_thirst, 150, 200).
+amount(player_init_hunger, 100, 150).
+amount(player_init_thirst, 100, 150).
+amount(player_hp, 0, 200).
+amount(player_hunger, 0 , 150).
+amount(player_thirst, 0, 150).
+amount(inventory, 0, 10).
 
 initPlayer:-
 	/* initialize player info */

@@ -194,7 +194,7 @@ print_map_symbol(Row, Col):-
 	player_pos(Pos_y, Pos_x),
 	Row == Pos_y,
 	Col == Pos_x,!,
-	format('  you  ',[]).
+	format('  YOU  ',[]).
 	
 print_map_symbol(Row, Col):-
 	/* Printing border as symbol */
