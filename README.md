@@ -31,7 +31,7 @@ Documentation included in package
 # -- USABLE COMMAND --
 
 
-start.          | run the program
+start.    \t      | run the program\n
 cont.           | continue last game
 new_game.       | create new game data
 save(filename). | Create save data of your current game
