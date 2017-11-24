@@ -61,6 +61,7 @@ manual:-
 	write('- F - = food'),nl,
 	write('- D - = drink'),nl,
 	write('- W - = weapon'),nl,nl,
+	write('- ? - = other item / special item'),nl,nl,
 	write(' ___  = accessible'),nl,
 	write('- # - = inaccessible'),nl,nl,
 	
