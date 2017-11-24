@@ -1,5 +1,4 @@
 
-
 /*** ====================         DECLARATION OF DYNAMIC FACT     =========================== ***/
 
 :- dynamic(game_running/1).	game_running(false).
@@ -33,8 +32,6 @@
 :- include(init).
 :- include(storage).
 
-:- include(test).
-
 /*** ====================         MAIN FUNCITON     =========================== ***/
 
 
@@ -48,9 +45,8 @@ start:-
 	asserta(game_running(true)), 
 	show_title,nl,nl,nl,
 	
-	write('          Type cont. to continue, or new_game. to start a new game '),nl ,nl,
+	write('          Type cont. to continue, or new_game. to start a new game '),nl ,nl.
 	
-	cont.
 	
 start:-
 
@@ -72,4 +68,6 @@ quit:-
 	halt.
 
 
+radar:-
+	modify_inventory([radar]).
 

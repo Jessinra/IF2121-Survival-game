@@ -156,7 +156,7 @@ create_caves:-
 	create_world(caves, 2, 21, 1,true),
 	create_world(caves, 2, 22, 2,true),
 	create_world(caves, 2, 23, 4,true),
-	create_world(caves, 12, 22, 4,true),
+	create_world(caves, 12, 22, 3,true),
 	create_world(caves, 10, 23, 5,true),
 	create_world(caves, 2, 24, 13,true).
 	

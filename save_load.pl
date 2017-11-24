@@ -35,30 +35,18 @@ load_game(Filename):-
 	asserta(player_weapon(New_Weapon)),
 	asserta(player_inventory(New_Inventory)),
 	
-	map_width(Map_width), 
-	map_length(Map_length), 
 	map_items(Map_items),
 	enemies(Enemies),
-	special_terains(Special_terains),
 
-	retract(map_width(Map_width)),
-	retract(map_length(Map_length)),
 	retract(map_items(Map_items)),
 	retract(enemies(Enemies)),
-	retract(special_terains(Special_terains)),
 	
 	/* Read map data */
-	read(Stream, New_Map_width),    	
-    read(Stream, New_Map_length),	
 	read(Stream, New_Map_items),		
 	read(Stream, New_Enemies),			
-	read(Stream, New_Special_terains),	
 
-	asserta(map_width(New_Map_width)),
-	asserta(map_length(New_Map_length)),
 	asserta(map_items(New_Map_items)),
 	asserta(enemies(New_Enemies)),
-	asserta(special_terains(New_Special_terains)),
 	
 	write('Data successfully loaded !'), nl,
 	close(Stream).
@@ -77,11 +65,8 @@ save_game(Filename):-
 	player_weapon(Weapon),
 	player_inventory(Inventory),
 	
-	map_width(Map_width), 
-	map_length(Map_length), 
 	map_items(Map_items),
 	enemies(Enemies),
-	special_terains(Special_terains),
 
 	/* Write player data */
 	write(Stream, Health), 			write(Stream, '.'), nl(Stream),
@@ -93,11 +78,8 @@ save_game(Filename):-
 	write(Stream, Inventory), 		write(Stream, '.'), nl(Stream),
 	
 	/* Write map data */
-	write(Stream, Map_width),		write(Stream, '.'), nl(Stream),
-	write(Stream, Map_length), 		write(Stream, '.'), nl(Stream),
 	write(Stream, Map_items), 		write(Stream, '.'), nl(Stream),
 	write(Stream, Enemies), 		write(Stream, '.'), nl(Stream),
-	write(Stream, Special_terains), write(Stream, '.'), nl(Stream),
 	
 	write('Save data successfully created !'), nl,
 	close(Stream).

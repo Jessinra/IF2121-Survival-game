@@ -2,32 +2,57 @@
 
 
 
-set_enemies([A1,B1,X1,Y1],C,D) :- 
-	
+set_enemies:- 
 	amount(enemy, E_min, E_max),
+	randomize,random(E_min, E_max, Enemy_count),
+	random_enemies(Enemy_count,_).
 	
-	random(E_min, E_max, Enemy_count),
-	random_enemy([A1,B1,X1,Y1],C,Enemy_count,D).
-	
-random_enemy([],[],0,_) :- !.
-
-random_enemy([B1,X1,Y1],C,E,D) :- 
+random_enemies(0,_) :- !. /* berubah */
+random_enemies(Count,List_result) :- /* berubah */
+	/* generate random enemies */
 
 	world_width(WD),
 	world_height(WH),
+	WD1 is WD - 1,
+	WH1 is WH - 1,
+	randomize,random(2,WH1, Enemy_row),
+	randomize,random(2,WD1, Enemy_col),
+	
+	player_pos(Player_row,Player_col),	
+	sama(Enemy_row,Player_row,S1),
+	sama(Player_col,Enemy_col,S2), 
+	#\(#/\(S1,S2)),!,
 	
 	amount(enemy_atk, EA_min, EA_max),
-	random(EA_min, EA_max, Enemy_atk), 
-	random(1,WD,Enemy_row), 
-	random(1,WH,Enemy_col), 
+	randomize,random(EA_min, EA_max, Enemy_atk),
+	addObj(List_result,[Enemy_atk,Enemy_row,Enemy_col],List_result1),
+	modify_enemies(List_result1),
 	
-	player_pos(Player_row,Player_col), 
-	(sublist([_,Enemy_row,Enemy_col],map_items(C)) #\/ ((Player_row==Enemy_row) #\/(Player_col==Enemy_col))) ->
-	random_enemy([Enemy_atk,Enemy_row,Enemy_col],C,E,D); 
-	append([Enemy_atk,Enemy_row,Enemy_col],C,D), 
-	E1 is E-1, 
-	random_enemy([Enemy_atk1,Enemy_row1,Enemy_col1],C,E1,D),
-	modify_map_items(D).
+	Count1 is Count-1,
+	random_enemies(Count1, List_result1).
+
+random_enemies(Count,List_result) :- /* berubah */
+	/* generate random enemies */
+
+	world_width(WD),
+	world_height(WH),
+	WD1 is WD - 1,
+	WH1 is WH - 1,
+	randomize,random(2,WH1, Enemy_row),
+	randomize,random(2,WD1, Enemy_col),
+	player_pos(Player_row,Player_col),	
+	sama(Enemy_row,Player_row,S1),
+	sama(Player_col,Enemy_col,S2), 
+	#/\(S1,S2),!,
+	
+	random_enemies(Count, List_result).	
+
+sama(X,Y,Z):- /* berubah */
+	=:=(X,Y),
+	Z is 1.
+sama(X,Y,Z):- /* berubah */
+	\==(X,Y),
+	Z is 0.
 	
 	
 init_enemy_on_map:-
@@ -47,8 +72,14 @@ set_enemy_on_map(Enemies):-
 /* Note : random 1 - 6, this make sure enemy only has 66.66% chance to move */
 
 generate_enemy_movement:-
+
 	enemy_on_map(EAtk,Pos_row,Pos_col),
-	random(1,6,M),
+	attackenemy(EAtk, Pos_row, Pos_col),fail.
+	
+generate_enemy_movement:-
+
+	enemy_on_map(EAtk,Pos_row,Pos_col),
+	randomize,random(1,6,M),
 	moveenemy(M, EAtk, Pos_row, Pos_col),fail.
 	
 generate_enemy_movement:-
@@ -57,7 +88,9 @@ generate_enemy_movement:-
 	
 moveenemy(M, EAtk, Pos_row, Pos_col):- 
 	/* Move enemy to right */
-
+	
+	player_pos(Player_row, Player_col),
+	(Player_row \== Pos_row; Player_col \== Pos_col),!,
 	M == 1,!, 
 	Pos_new is Pos_col+1,
 	\+ world(border, Pos_row, Pos_new),
@@ -68,11 +101,13 @@ moveenemy(M, EAtk, Pos_row, Pos_col):-
 	modify_enemies(New_Enemy_list),
 	
 	retract(enemy_on_map(EAtk,Pos_row,Pos_col)),
-	asserta(enemy_on_map(EAtk,Pos_row,Pos_new)),!.
+	asserta(enemy_on_map(EAtk,Pos_row,Pos_new)).
 	
 moveenemy(M, EAtk, Pos_row, Pos_col):- 
 	/* Move enemy to left */
-
+	
+	player_pos(Player_row, Player_col),
+	(Player_row \== Pos_row; Player_col \== Pos_col),!,
 	M == 2,!,
 	Pos_new is Pos_col-1,
 	\+ world(border, Pos_row, Pos_new),
@@ -83,11 +118,13 @@ moveenemy(M, EAtk, Pos_row, Pos_col):-
 	modify_enemies(New_Enemy_list),
 	
 	retract(enemy_on_map(EAtk,Pos_row,Pos_col)),
-	asserta(enemy_on_map(EAtk,Pos_row,Pos_new)),!.
+	asserta(enemy_on_map(EAtk,Pos_row,Pos_new)).
 	
 moveenemy(M, EAtk, Pos_row, Pos_col):- 
 	/* Move enemy down */
 
+	player_pos(Player_row, Player_col),
+	(Player_row \== Pos_row; Player_col \== Pos_col),!,
 	M == 3,!,
 	Pos_new is Pos_row+1,
 	\+ world(border, Pos_new, Pos_col),
@@ -98,11 +135,13 @@ moveenemy(M, EAtk, Pos_row, Pos_col):-
 	modify_enemies(New_Enemy_list),
 	
 	retract(enemy_on_map(EAtk,Pos_row,Pos_col)),
-	asserta(enemy_on_map(EAtk,Pos_new,Pos_col)),!.
+	asserta(enemy_on_map(EAtk,Pos_new,Pos_col)).
 	
 moveenemy(M, EAtk, Pos_row, Pos_col):- 
 	/* Move enemy up */
 
+	player_pos(Player_row, Player_col),
+	(Player_row \== Pos_row; Player_col \== Pos_col),!,
 	M == 4,!,
 	Pos_new is Pos_row - 1,
 	\+ world(border, Pos_new, Pos_col),
@@ -113,17 +152,30 @@ moveenemy(M, EAtk, Pos_row, Pos_col):-
 	modify_enemies(New_Enemy_list),
 	
 	retract(enemy_on_map(EAtk,Pos_row,Pos_col)),
-	asserta(enemy_on_map(EAtk,Pos_new,Pos_col)),!.
+	asserta(enemy_on_map(EAtk,Pos_new,Pos_col)).
 	
-moveenemy(M, _, _):- 
-
+moveenemy(M, _, Pos_row, Pos_col):- 
+	
+	player_pos(Player_row, Player_col),
+	(Player_row \== Pos_row; Player_col \== Pos_col),!,
 	M == 5,!.
 
-moveenemy(M, _, _):- 
+moveenemy(M, _, Pos_row, Pos_col):- 
 
+	player_pos(Player_row, Player_col),
+	(Player_row \== Pos_row; Player_col \== Pos_col),!,
 	M == 6,!.	
 	
+
+attackenemy(EAtk, Pos_row, Pos_col):-
 	
+	player_pos(Player_row, Player_col),
+	Player_row == Pos_row,
+	Player_col == Pos_col,!,
+	
+	modify_player_health(-EAtk),
+	format("\nYou took ~p damages !!\n",[EAtk]),
+	check_game_condition.	
 	
 	
 	

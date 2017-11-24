@@ -31,6 +31,11 @@ w:-
 	asserta(player_pos(Pos_row,Pos_new)),
 	modify_player_hunger(-1),
 	modify_player_thirst(-1),
+	
+	world(Prev_terain, Pos_row, Pos_col),
+	world(New_terain, Pos_row, Pos_new),
+	story_change_terains(Prev_terain, New_terain),
+	
 	generate_enemy_movement,
 	check_game_condition.
 
@@ -55,6 +60,11 @@ n:-
 	asserta(player_pos(Pos_new,Pos_col)),
 	modify_player_hunger(-1),
 	modify_player_thirst(-1),
+	
+	world(Prev_terain, Pos_row, Pos_col),
+	world(New_terain, Pos_new, Pos_col),
+	story_change_terains(Prev_terain, New_terain),
+	
 	generate_enemy_movement,
 	check_game_condition.
 	
@@ -67,6 +77,7 @@ e:-
 	write('Seems I can\'t move there....\n'),nl,
 	modify_player_hunger(-1),
 	modify_player_thirst(-1),
+	
 	generate_enemy_movement,
 	check_game_condition.
  
@@ -79,6 +90,11 @@ e:-
 	asserta(player_pos(Pos_row,Pos_new)),
 	modify_player_hunger(-1),
 	modify_player_thirst(-1),
+	
+	world(Prev_terain, Pos_row, Pos_col),
+	world(New_terain, Pos_row, Pos_new),
+	story_change_terains(Prev_terain, New_terain),
+	
 	generate_enemy_movement,
 	check_game_condition.
 
@@ -103,5 +119,10 @@ s:-
 	asserta(player_pos(Pos_new,Pos_col)),
 	modify_player_hunger(-1),
 	modify_player_thirst(-1),
+	
+	world(Prev_terain, Pos_row, Pos_col),
+	world(New_terain, Pos_new, Pos_col),
+	story_change_terains(Prev_terain, New_terain),
+	
 	generate_enemy_movement,
 	check_game_condition.

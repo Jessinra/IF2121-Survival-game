@@ -107,15 +107,21 @@ look:-
 	Col8 is Col + 0, Row8 is Row + 1, print_map_symbol(Row8,Col8),
 	Col9 is Col + 1, Row9 is Row + 1, print_map_symbol(Row9,Col9),
 	
-	nl,nl,nl,
-	write('You search for items around you, and apparantly you found '),
-	\+ show_item_below_you(Row, Col),
-	write(' that\'s all... ').
+	show_item_nearby.
 	
+show_item_nearby:-
+
+	nl,nl,nl,
+	player_pos(Row, Col),
+	write('You briefly looked around you, and apparantly you found '),
+	\+ show_item_below_you(Row, Col),
+	write(' that\'s all... '),!.
+	
+
 show_item_below_you(Row, Col):-
 	
 	\+ item_on_map(_, Row, Col),
-	format("nothing but your fear. ",[]),!.
+	format("nothing but your fear and anxiousness, ",[]),!,fail.
 	
 show_item_below_you(Row, Col):-
 	
@@ -241,6 +247,22 @@ print_whole_map(Row, Col):-
 	New_row is Row + 1, !,
 	print_whole_map(New_row, 1).
 	
+show_preface:-
+
+	nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,
+	nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,
+	write('                                                        Every year,.....'),nl,sleep(2),
+	write('                             There will be a ritual, to recreate a GAME created by ancient god...'),nl,sleep(2),
+	write('                                         people decide, and send their best fighter '),nl,sleep(2),
+	write('                                                ending them into a sky arena... '),nl,sleep(2),
+	write('                                 so they can fight the demon and claim the glory of a noble warrior...'),nl,nl,sleep(4),
+	write('                                      But this year, the new king changed the rules...'),nl,sleep(5),
+	write('                                             There\'s no more demon summoned...'),nl,nl,sleep(2),
+	write('                                               and there\'s only 1 rules now...'),nl,nl,sleep(2),
+	
+	write('                                                   "FIGHT FOR YOUR LIFE"   '),nl,sleep(2),
+	write('                                         and only one person shall come out alive'),nl,nl,nl,nl,sleep(2),
+	write('                                             ~~    May the GOD be with you     ~~'),nl,sleep(4).
 	
 	
 show_you_died:-

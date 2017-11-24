@@ -70,139 +70,276 @@ set_item_on_map(Items):-
 	[Head|Tail] = Items,
 	[Item_name, Row, Col] = Head,
 	
-	asserta(item_on_map(Item_name, Row, Col)),
+	asserta(item_on_map(Item_name, Row, Col)),!,
 	set_item_on_map(Tail).
 	
 
-
-random_object([A1,X1,Y1],C,D) :- 
+	
+random_object :- /* berubah */
 	/* initialize item to map when started as new game */
-	
 	amount(medicine, M_min, M_max),
-	random(M_min, M_max, E),
-	random_object_medicine([A1,X1,Y1],C,E,D),
+	randomize,random(M_min, M_max, M_count),
+	random_object_medicine([],M_count ),
 	
-	amount(medicine, F_min, F_max),
-	random(F_min, F_max, E),
-	random_object_food([A1,X1,Y1],C,E,D),
+	map_items(Items_after_medicine),
+	amount(food, F_min, F_max),
+	randomize,random(F_min, F_max, F_count),
+	random_object_food(Items_after_medicine,F_count ),
 	
-	amount(medicine, D_min, D_max),
-	random(D_min, D_max, E),
-	random_object_water([A1,X1,Y1],C,E,D),
+	map_items(Items_after_food), 
+	amount(water, D_min, D_max),
+	randomize,random(D_min, D_max, D_count),
+	random_object_water(Items_after_food,D_count ),
 	
-	amount(medicine, W_min, W_max),
-	random(W_min, W_max, E),
-	random_object_weapon([A1,X1,Y1],C,E,D),
+	map_items(Items_after_water), 
+	amount(weapon, W_min, W_max),
+	randomize,random(W_min, W_max, W_count),
+	random_object_weapon(Items_after_water,W_count ),
 	
-	amount(medicine, S_min, S_max),
-	random(S_min, S_max, E),
-	random_object_special([A1,X1,Y1],C,E,D),
+	map_items(Items_after_weapon),
+	amount(special, S_min, S_max),
+	randomize,random(S_min, S_max, S_count),
+	random_object_special(Items_after_weapon,S_count ),
 	
-	amount(medicine, O_min, O_max),
-	random(O_min, O_max, E),
-	random_object_others([A1,X1,Y1],C,E,D).
-
-random_object_medicine([],[],0,_) :- !.
-random_object_medicine([A1,X1,Y1],C,E,D) :-
+	map_items(Items_after_special), 
+	amount(others, O_min, O_max),
+	randomize,random(O_min, O_max, O_count),
+	random_object_other(Items_after_special,O_count).
+	
+random_object_medicine(_,0) :- !. /* berubah */
+random_object_medicine(List_init,Count) :- /* berubah */
 	/* generate random medicine */
 
 	world_width(WD),
 	world_height(WH),
+	WD1 is WD - 1,
+	WH1 is WH - 1,
 	
-	random(1,WD,X),
-	random(1,WH,Y),
-	player_pos(X2,Y2),
-	(sublist([_,X,Y],C)#\/((X2==X)#\/(Y2==Y)))->
-	random_object_medicine([A,X,Y],C,E,D);
-	append([A,X,Y],C,D),
-	E1 is E-1,
-	random_object_medicine([A1,X1,Y1],C,E1,D),
-	modify_map_items(D).
+	randomize,random(2,WH1, Item_row),
+	randomize,random(2,WD1, Item_col),	
+	randomize,random(1,5,Type),
+	random_object_name_medicine(Type,Item_name),
+	addObj(List_init,[Item_name,Item_row,Item_col],List_result1),
+	modify_map_items(List_result1),!,
+	
+	Count1 is Count-1,
+	random_object_medicine(List_result1, Count1).	
 
-random_object_food([],[],0,_) :- !.
-random_object_food([A1,X1,Y1],C,E,D) :-  
+random_object_name_medicine(Type,Item_name) :-
+	Type==1,!,
+	Item_name=first_aid.
+
+random_object_name_medicine(Type,Item_name) :-
+	Type==2,!,
+	Item_name=bandage.
+	
+random_object_name_medicine(Type,Item_name) :-
+	Type==3,!,
+	Item_name=pain_killer.
+	
+random_object_name_medicine(Type,Item_name) :-
+	Type==4,!,
+	Item_name=herbs.
+	
+random_object_name_medicine(Type,Item_name) :-
+	Type==5,!,
+	Item_name=stimulant.
+
+random_object_food(_,0) :- !. /* berubah */
+random_object_food(List_init,Count) :- /* berubah */
 	/* generate random food */
-	
+
 	world_width(WD),
 	world_height(WH),
+	WD1 is WD - 1,
+	WH1 is WH - 1,
 	
-	random(1,WD,X),
-	random(1,WH,Y),
-	player_pos(X2,Y2),
-	(sublist([_,X,Y],C)#\/((X2==X)#\/(Y2==Y)))->
-	random_object_food([A,X,Y],C,E,D);
-	append([A,X,Y],C,D),
-	E1 is E-1,
-	random_object_food([A1,X1,Y1],C,E1,D),
-	modify_map_items(D).
+	randomize,random(2,WH1, Item_row),
+	randomize,random(2,WD1, Item_col),	
+	randomize,random(1,5,Type),	
+	random_object_name_food(Type,Item_name),
 
-random_object_water([],[],0,_) :- !.
-random_object_water([A1,X1,Y1],C,E,D) :-  
+	addObj(List_init,[Item_name,Item_row,Item_col],List_result1),
+	modify_map_items(List_result1),!,
+	
+	Count1 is Count-1,
+	random_object_food(List_result1, Count1).	
+
+random_object_name_food(Type,Item_name) :-
+	Type==1,!,
+	Item_name=canned_food.
+
+random_object_name_food(Type,Item_name) :-
+	Type==2,!,
+	Item_name=fruits.
+	
+random_object_name_food(Type,Item_name) :-
+	Type==3,!,
+	Item_name=raw_meat.
+	
+random_object_name_food(Type,Item_name) :-
+	Type==4,!,
+	Item_name=mushrooms.
+	
+random_object_name_food(Type,Item_name) :-
+	Type==5,!,
+	Item_name=edible_plant.
+	
+random_object_water(_,0) :- !. /* berubah */
+random_object_water(List_init,Count) :- /* berubah */
 	/* generate random water */
-	
+
 	world_width(WD),
 	world_height(WH),
+	WD1 is WD - 1,
+	WH1 is WH - 1,
 	
-	random(1,WD,X),
-	random(1,WH,Y),
-	player_pos(X2,Y2),
-	(sublist([_,X,Y],C)#\/((X2==X)#\/(Y2==Y)))->
-	random_object_water([A,X,Y],C,E,D);
-	append([A,X,Y],C,D),
-	E1 is E-1,
-	random_object_water([A1,X1,Y1],C,E1,D),
-	modify_map_items(D).
+	randomize,random(2,WH1, Item_row),
+	randomize,random(2,WD1, Item_col),	
+	randomize,random(1,3,Type),	
+	random_object_name_water(Type,Item_name),
+	
+	addObj(List_init,[Item_name,Item_row,Item_col],List_result1),
+	modify_map_items(List_result1),!,
+	
+	Count1 is Count-1,
+	random_object_water(List_result1, Count1).	
 
-random_object_weapon([],[],0,_) :- !.
-random_object_weapon([A1,X1,Y1],C,E,D) :-  
+random_object_name_water(Type,Item_name) :-
+	Type==1,!,
+	Item_name=bottled_water.
+
+random_object_name_water(Type,Item_name) :-
+	Type==2,!,
+	Item_name=clean_water.
+	
+random_object_name_water(Type,Item_name) :-
+	Type==3,!,
+	Item_name=bottled_tea.
+
+random_object_weapon(_,0) :- !. /* berubah */
+random_object_weapon(List_init,Count) :- /* berubah */
 	/* generate random weapon */
-	
-	world_width(WD),
-	world_height(WH),
-	
-	random(1,WD,X),
-	random(1,WH,Y),
-	player_pos(X2,Y2),
-	(sublist([_,X,Y],C)#\/((X2==X)#\/(Y2==Y)))->
-	random_object_weapon([A,X,Y],C,E,D);
-	append([A,X,Y],C,D),
-	E1 is E-1,
-	random_object_weapon([A1,X1,Y1],C,E1,D),
-	modify_map_items(D).
 
-random_object_special([],[],0,_) :- !.
-random_object_special([A1,X1,Y1],C,E,D) :-  
-	/* generate random special item */
-	
 	world_width(WD),
 	world_height(WH),
+	WD1 is WD - 1,
+	WH1 is WH - 1,
 	
-	random(1,WD,X),
-	random(1,WH,Y),
-	player_pos(X2,Y2),
-	(sublist([_,X,Y],C)#\/((X2==X)#\/(Y2==Y)))->
-	random_object_special([A,X,Y],C,E,D);
-	append([A,X,Y],C,D),
-	E1 is E-1,
-	random_object_special([A1,X1,Y1],C,E1,D),
-	modify_map_items(D).		
+	randomize,random(2,WH1, Item_row),
+	randomize,random(2,WD1, Item_col),		
+	randomize,random(1,5,Type),
+	random_object_name_weapon(Type,Item_name),
+
+	addObj(List_init,[Item_name,Item_row,Item_col],List_result1),
+	modify_map_items(List_result1),!,
 	
-random_object_others([],[],0,_) :- !.
-random_object_others([A1,X1,Y1],C,E,D) :-  
-	/* generate random other item */
+	Count1 is Count-1,
+	random_object_weapon(List_result1, Count1).	
+
+random_object_name_weapon(Type,Item_name) :-
+	Type==1,!,
+	Item_name=riffle.
+
+random_object_name_weapon(Type,Item_name) :-
+	Type==2,!,
+	Item_name=long_sword.
 	
+random_object_name_weapon(Type,Item_name) :-
+	Type==3,!,
+	Item_name=bow_arrow.
+	
+random_object_name_weapon(Type,Item_name) :-
+	Type==4,!,
+	Item_name=long_bow.
+	
+random_object_name_weapon(Type,Item_name) :-
+	Type==5,!,
+	Item_name=spear.
+
+random_object_other(_,0) :- !. /* berubah */
+random_object_other(List_init,Count) :- /* berubah */
+	/* generate random other */
+
 	world_width(WD),
 	world_height(WH),
+	WD1 is WD - 1,
+	WH1 is WH - 1,
 	
-	random(1,WD,X),
-	random(1,WH,Y),
-	player_pos(X2,Y2),
-	(sublist([_,X,Y],C)#\/((X2==X)#\/(Y2==Y)))->
-	random_object_others([A,X,Y],C,E,D);
-	append([A,X,Y],C,D),
-	E1 is E-1,
-	random_object_others([A1,X1,Y1],C,E1,D),
-	modify_map_items(D).		
+	randomize,random(2,WH1, Item_row),
+	randomize,random(2,WD1, Item_col),	
+	randomize,random(1,8,Type),
+	random_object_name_other(Type,Item_name),
+
+	addObj(List_init,[Item_name,Item_row,Item_col],List_result1),
+	modify_map_items(List_result1),!,
+	
+	Count1 is Count-1,
+	random_object_other(List_result1, Count1).	
+	
+random_object_name_other(Type,Item_name) :-
+	Type==1,!,
+	Item_name=cloth.
+
+random_object_name_other(Type,Item_name) :-
+	Type==2,!,
+	Item_name=maps.
+	
+random_object_name_other(Type,Item_name) :-
+	Type==3,!,
+	Item_name=backpack.
+	
+random_object_name_other(Type,Item_name) :-
+	Type==4,!,
+	Item_name=pouch.
+	
+random_object_name_other(Type,Item_name) :-
+	Type==5,!,
+	Item_name=empty_bottle.
+
+random_object_name_other(Type,Item_name) :-
+	Type==6,!,
+	Item_name=empty_can.
+	
+random_object_name_other(Type,Item_name) :-
+	Type==7,!,
+	Item_name=magic_wand.
+	
+random_object_name_other(Type,Item_name) :-
+	Type==8,!,
+	Item_name=stick.
+
+random_object_special(_,0) :- !. /* berubah */
+random_object_special(List_init,Count) :- /* berubah */
+	/* generate random special */
+
+	world_width(WD),
+	world_height(WH),
+	WD1 is WD - 1,
+	WH1 is WH - 1,
+	
+	randomize,random(2,WH1, Item_row),
+	randomize,random(2,WD1, Item_col),	
+	randomize,random(1,3,Type),	
+	random_object_name_special(Type,Item_name),
+
+	addObj(List_init,[Item_name,Item_row,Item_col],List_result1),
+	modify_map_items(List_result1),!,
+	
+	Count1 is Count-1,
+	random_object_special(List_result1, Count1).	
+
+random_object_name_special(Type,Item_name) :-
+	Type==1,!,
+	Item_name=radar.
+
+random_object_name_special(Type,Item_name) :-
+	Type==2,!,
+	Item_name=barrier.
+	
+random_object_name_special(Type,Item_name) :-
+	Type==3,!,
+	Item_name=void_bomb.	
 	
 	
 /**~~~~~~~~~~       take, drop and use item       ~~~~~~~~~~~~~**/ 	
@@ -229,7 +366,7 @@ take(Object) :-
 	
 	retract(item_on_map(Object,A,B)),
 	
-	format("~p has been taken from this area.", [Object]), 
+	format("~p has been taken from this area.", [Object]),!, 
 	generate_enemy_movement,!.
 	
 take(Object) :- 
@@ -242,7 +379,7 @@ take(Object) :-
 	schObj(Oldmapitems, [Object,A,B], D), /* Cek apakah barang tersebut posisinya sama dengan player */
 	D == 1,
 	
-	inv_count(OldInventory, X), X == Max_inventory,
+	inv_count(OldInventory, X), X == Max_inventory,!,
 	write('Your inventory is full!.'), !.
 
 take(Object) :- 
@@ -253,7 +390,7 @@ take(Object) :-
 	schObj(Oldmapitems, [Object,A,B], D), /* Cek apakah barang tersebut posisinya sama dengan player */
 	D \== 1, !,
 	
-	format("~p was not found in this area.", [Object]), 
+	format("~p was not found in this area.", [Object]), !,
 	generate_enemy_movement,!.
 	
 drop(Object) :- 
@@ -273,7 +410,7 @@ drop(Object) :-
 	
 	asserta(item_on_map(Object, A, B)),
 	
-	format("You dropped ~p in this area.", [Object]), 
+	format("You dropped ~p in this area.", [Object]), !,
 	generate_enemy_movement,!.
 	
 drop(Object) :- 
@@ -283,7 +420,7 @@ drop(Object) :-
 	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
 	D \== 1, !,
 	
-	format("You don't have ~p in your inventory.", [Object]),
+	format("You don't have ~p in your inventory.", [Object]),!,
 	generate_enemy_movement,!.
 
 use(_) :-
@@ -302,7 +439,8 @@ use(Object) :-
 	player_hunger(Hunger),
 	amount(player_hunger, _, Max_hunger),
 	Hunger > Max_hunger, !,
-	write('You are already full!').
+	write('You are already full!'),!,
+	generate_enemy_movement,!.
 	
 use(Object) :-
 	/* rule to eat object, Case 2 : Really Hungry */
@@ -321,7 +459,7 @@ use(Object) :-
 	modify_inventory(NewInventory),
 	modify_player_hunger(Addition), /* NILAI MUNGKIN BERUBAH */
 	format("You ate the ~p. ", [Object]),
-	format("Your hunger raised by ~p. ", [Addition]),
+	format("Your hunger raised by ~p. ", [Addition]),!,
 	generate_enemy_movement,!.
 
 use(Object) :-
@@ -342,7 +480,7 @@ use(Object) :-
 	modify_inventory(NewInventory),
 	modify_player_hunger(MinAdd), /* NILAI MUNGKIN BERUBAH */
 	format("You ate the ~p. ", [Object]),
-	format("Your hunger raised by ~p. ", [MinAdd]),
+	format("Your hunger raised by ~p. ", [MinAdd]),!,
 	generate_enemy_movement,!.
 
 use(Object) :-
@@ -356,7 +494,8 @@ use(Object) :-
 	amount(player_hp, _, Max_hp),
 	player_health(Health),
 	Health >= Max_hp, !,
-	write('You are healthy already!').
+	write('You are healthy already!'),!,
+	generate_enemy_movement,!.
 	
 use(Object) :-
 	/* rule to use object, Case 2 : Hurt */
@@ -375,7 +514,7 @@ use(Object) :-
 	modify_inventory(NewInventory),
 	modify_player_health(Addition), /* NILAI MUNGKIN BERUBAH */
 	format("You used ~p. ", [Object]),
-	format("Your health raised by ~p. ", [Addition]),
+	format("Your health raised by ~p. ", [Addition]),!,
 	generate_enemy_movement,!.
 	
 use(Object) :-
@@ -397,7 +536,7 @@ use(Object) :-
 	modify_inventory(NewInventory),
 	modify_player_health(MinAdd), /* NILAI MUNGKIN BERUBAH */
 	format("You used ~p. ", [Object]),
-	format("Your health raised by ~p. ", [MinAdd]),
+	format("Your health raised by ~p. ", [MinAdd]),!,
 	generate_enemy_movement,!.
 	
 use(Object) :-
@@ -410,9 +549,9 @@ use(Object) :-
 	
 	player_thirst(Thirst),
 	amount(player_thirst, _, Max_thirst),
-	Thirst >= Max_thirst, !,
-	
-	write('You are not thirsty.').
+	Thirst >= Max_thirst, 
+	write('You are not thirsty.'), !,
+	generate_enemy_movement,!.
 
 use(Object) :-
 	/* rule to drink object, Case 2 : you are thirsty */
@@ -467,7 +606,7 @@ use(Object) :-
 	delObj(OldInventory, Object, NewInventory),
 	modify_inventory(NewInventory),
 	modify_player_weapon(Object),
-	format("You wield ~p right now.", [Object]),
+	format("You wield ~p right now.", [Object]),!,
 	generate_enemy_movement,!.
 	
 use(Object) :-
@@ -477,7 +616,7 @@ use(Object) :-
 	schObj(OldInventory, Object, D), /* Cek apakah barang tersebut ada di inventory */
 	D \== 1, !,
 	
-	format("Sadly you don't have ~p in your inventory.", [Object]),
+	format("Sadly you don't have ~p in your inventory.", [Object]),!,
 	generate_enemy_movement,!.
 
 	
@@ -489,7 +628,7 @@ store:-
 	addObj(OldInventory, Current_weapon, NewInventory),
 	modify_inventory(NewInventory),
 	modify_player_weapon(bare_hands),
-	format("You stored your ~p, let's hope the best..", [Current_weapon]),
+	format("You stored your ~p, let's hope the best..", [Current_weapon]),!,
 	generate_enemy_movement,!.
 
 
@@ -500,7 +639,7 @@ void_bomb:-
 	player_inventory(OldInventory),
 	schObj(OldInventory, void_bomb, D), D == 0,!,
 	
-	write('What are you trying to do ? '),nl,
+	write('What are you trying to do ? '),nl,!,
 	generate_enemy_movement,!.
 	
 void_bomb:-
@@ -519,7 +658,7 @@ void_bomb:-
 	write('BOOOMMM !!!!..'), nl, sleep(1),
 	write('..'), nl, sleep(1),
 	write('..'), nl, sleep(1),
-	write('You opened your eyes slowly, and you realized suddenly everything\'s gone...'),
+	write('You opened your eyes slowly, and you realized suddenly everything\'s gone...'),!,
 	generate_enemy_movement,!.
 	
 void_bomb:-
@@ -528,7 +667,7 @@ void_bomb:-
 	player_inventory(OldInventory),
 	schObj(OldInventory, void_bomb, D), D == 1,
 	
-	write('Good choice,... better save it for later use...'),
+	write('Good choice,... better save it for later use...'),!,
 	generate_enemy_movement,!.
 
 activate_bomb:-
