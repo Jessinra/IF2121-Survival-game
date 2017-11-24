@@ -31,34 +31,50 @@ Documentation included in package
 # -- USABLE COMMAND --
 
 
-start.    \t      | run the program\n
+start.          | run the program
+
 cont.           | continue last game
+
 new_game.       | create new game data
+
 save(filename). | Create save data of your current game
+
 load(filename). | Load save data from your previous game
+
 quit.           | Quit without saving
+
 manual.         | Display manual
 
 # -- IN GAME COMMAND -- 
 	
 n.              | Move north
+
 s.              | Move south
+
 w.              | Move west
+
 e.              | Move east
 
+
 take(object).   | Take something
+
 drop(object).   | Drop something
+
 use(object).    | Use something
 
+
 attack.         | Attack enemy
+
 map.            | Display map
+
 look.           | Look around
+
 status.         | Display player info
 
+
 store.          | Store weapon 
+
 void_bomb.      | ???
-
-
 
 # -- ADDITIONAL NOTES --
 
