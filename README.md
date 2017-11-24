@@ -11,25 +11,23 @@ ITB - 2017
 				
 =================================================================================
 
-Sebuah game simulasi survival game sederhana yang dibuat menggunakan prolog.
+Simple simulation of survival game created using prolog.
 
-=================================================================================
 # -- REQUIREMENTS --
 
 prolog : GNU prolog
 
-=================================================================================
+
 # -- INSTALLATION --
 
 not needed.
 Run : open GNU prolog, and consult 'survival.pl'
 
-=================================================================================
+
 # -- REFERENCE -- 
 
 Documentation included in package
 
-=================================================================================
 # -- USABLE COMMAND --
 
 
@@ -61,12 +59,12 @@ store. 	    	| Store weapon
 void_bomb.  	| ???
 
 
-=================================================================================
+
 # -- ADDITIONAL NOTES --
 
 currently on beta version
 
-=================================================================================
+
 # -- CONTRIBUTORS --
 
 Jessin Donnyson - 13516112 - Institut Teknologi Bandung
@@ -74,7 +72,7 @@ Kevin Andrian 	- 13516118 - Institut Teknologi Bandung
 Kevin Muharyman - 13516124 - Institut Teknologi Bandung
 Teresa 		- 13516133 - Institut Teknologi Bandung
 
-=================================================================================
+
 # -- LICENSE -- 
 
 All right reserved - November 2017
