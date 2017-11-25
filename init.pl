@@ -167,10 +167,10 @@ check_game_condition:-
 	
 	Enemies == [],!,
 	nl,nl,nl,show_congratulation,
-	write('                                               You heard the horn sound, you are very familiar with it. '),nl,
-	write('                            Every year you would hear the exact sound when watching the Hunger Games in your district. '),nl,
-	write('                                                   The horn signals the end of the Hunger Games.'),nl,nl,
-	write('                                                               You have won the Games!...            '),nl,!.
+	write('                                               You heard the horn sound, you are very familiar with it. '),nl,sleep(2),
+	write('                                       Every year you would hear the exact sound when the game has reached an end,.. '),nl,sleep(2),
+	write('                                 The horn signals that a victorious warrior has come out alive after the fierce battle...'),nl,nl,sleep(3),
+	write('                                                                You have won the Games!...            '),nl,!.
 
 check_game_condition:-
 	!.

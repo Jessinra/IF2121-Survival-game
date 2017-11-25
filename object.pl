@@ -673,10 +673,13 @@ void_bomb:-
 activate_bomb:-
 	
 	player_pos(Row, Col),
-	enemy_on_map(ERow, ECol),
+	enemy_on_map(EAtk,ERow, ECol),
+	enemies(Enemy_list),
 	abs(ERow - Row) =< 1,
 	abs(ECol - Col) =< 1,
-	retract(enemy_on_map(ERow,ECol)),fail.
+	delObj(Enemy_list, [EAtk, ERow, ECol], Del_Enemy_list),
+    modify_enemies(Del_Enemy_list),
+	retract(enemy_on_map(EAtk, ERow,ECol)),fail.
 	
 	
 	
