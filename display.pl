@@ -22,11 +22,14 @@ show_title:-
 
 
 show_inventory:-
+	/* Rules to show player inventory as a dropdown list */
+
 	player_inventory(Inventory),
 	print_inventory(Inventory).
 
+
 manual:-
-	/* manual can't be called if game hasn't been started */
+	/* Rules to show help  : can't be called if game hasn't been started */
 	
 	game_running(false),
 	write('How about calling init. to start the game ? :) '),nl,nl,!.
@@ -69,9 +72,12 @@ manual:-
 
 
 map:-
-	/*print whole map start from row 1 col 1 */
+	/* print whole map : radar found */
+
 	player_inventory(OldInventory),
-	schObj(OldInventory, radar, D), /* Check if radar is available */
+
+	/* Check if radar is available */
+	schObj(OldInventory, radar, D),
 	D == 1, !,
 	
 	write('bip...'), nl, sleep(0.5),
@@ -86,12 +92,16 @@ map:-
 	nl, print_whole_map(1, 1). 
 	
 map:-
-	/*print whole map start from row 1 col 1 */
+	/* print whole map : radar not found */
+
 	player_inventory(OldInventory),
-	schObj(OldInventory, radar, D), /* Check if radar is available */
+
+	/* Check if radar is available */
+	schObj(OldInventory, radar, D), 
 	D \== 1, !,nl,
 	write('I need to find a radar to use...'),nl,nl.
 	
+
 look:-
 	/* Rules to look surounding */
 	
@@ -110,7 +120,9 @@ look:-
 	
 	show_item_nearby.
 	
+
 show_item_nearby:-
+	/* Show items nearby as narative text */
 
 	nl,nl,nl,
 	player_pos(Row, Col),
@@ -120,11 +132,13 @@ show_item_nearby:-
 	
 
 show_item_below_you(Row, Col):-
+	/* (sub part) Show items nearby as narative text : not found */
 	
 	\+ item_on_map(_, Row, Col),
 	format("nothing but your fear and anxiousness, ",[]),!,fail.
 	
 show_item_below_you(Row, Col):-
+	/* (sub part) Show items nearby as narative text : found */
 	
 	item_on_map(Item_name, Row, Col),
 	format("a(n) ~p, ",[Item_name]), fail.
@@ -151,9 +165,9 @@ status:-
 	write(' Inventory    : '),nl, show_inventory.
 
 	
-	
-/**~~~~~~~~~~~~~~~~~ Displaying map ~~~~~~~~~~~~~~~~~**/
 
+
+/**~~~~~~~~~~~~~~~~~                     Displaying map                     ~~~~~~~~~~~~~~~~~**/
 
 print_map_symbol(Row, Col):-
 	/* Printing enemy  as symbol */
@@ -219,8 +233,9 @@ print_map_symbol(Row, Col):-
 	format(" ~p ",[Type]).
 	
 
+
 print_whole_map(Row, Col):-
-	/* Printing whole map recursively , basis */
+	/* Printing whole map recursively : basis */
 
 	world_width(WD),
 	world_height(WH),
@@ -230,7 +245,7 @@ print_whole_map(Row, Col):-
 	!.
 
 print_whole_map(Row, Col):-
-	/* Printing whole map recursively , if its still on same row */
+	/* Printing whole map recursively : recursive on same row */
 
 	world_width(WD),
 	print_map_symbol(Row,Col),
@@ -240,7 +255,7 @@ print_whole_map(Row, Col):-
 	print_whole_map(Row, New_col).
 	
 print_whole_map(Row, Col):-
-	/* Printing whole map recursively , if it's on last column */
+	/* Printing whole map recursively : switch to next row */
 
 	world_width(WD),
 	
@@ -248,7 +263,12 @@ print_whole_map(Row, Col):-
 	New_row is Row + 1, !,
 	print_whole_map(New_row, 1).
 	
+
+
+/** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                         Start & End game display              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~**/
+
 show_preface:-
+	/* Display story when new game begin */
 
 	nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,
 	nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,
@@ -267,26 +287,29 @@ show_preface:-
 	
 	
 show_you_died:-
+	/* Display you died screen */
+
 	nl,nl,nl,nl,nl,
-	write('     8. 8888.      ,8   ,o888888o.     8 8888      88           8 888888888o.       8 8888 8 8888888888   8 888888888o.      '),nl,
-	write('      8. 8888.    ,8 . 8888      88.   8 8888      88           8 8888     ^888.    8 8888 8 8888         8 8888     ^888.   '),nl,
-	write('       8. 8888.  ,8 ,8 8888        8b  8 8888      88           8 8888         88.  8 8888 8 8888         8 8888         88. '),nl,
- 	write('       8. 8888.,8   88 8888         8b 8 8888      88           8 8888          88  8 8888 8 8888         8 8888          88 '),nl,
-	write('         8. 88888   88 8888         88 8 8888      88           8 8888          88  8 8888 8 888888888888 8 8888          88 '),nl,
-	write('          8. 8888   88 8888         88 8 8888      88           8 8888          88  8 8888 8 8888         8 8888          88 '),nl,
-	write('           8 8888   88 8888        ,8P 8 8888      88           8 8888         ,88  8 8888 8 8888         8 8888         ,88 '),nl,
-	write('           8 8888    8 8888       ,8P    8888     ,8P           8 8888        ,88   8 8888 8 8888         8 8888        ,88  '),nl,
-	write('           8 8888      8888     ,88      8888   ,d8P            8 8888    ,o88P     8 8888 8 8888         8 8888    ,o88P    '),nl,
-	write('           8 8888        8888888P          Y88888P              8 888888888P        8 8888 8 888888888888 8 888888888P       '),nl,nl,nl,nl.
+	write('     8. 8888.      ,8   ,o888888o.     8 8888      88           8 888888888o.       8 8888 8 8888888888   8 888888888o.          '),nl,
+	write('      8. 8888.    ,8 . 8888      88.   8 8888      88           8 8888     ^888.    8 8888 8 8888         8 8888     ^888.       '),nl,
+	write('       8. 8888.  ,8 ,8 8888        8b  8 8888      88           8 8888         88.  8 8888 8 8888         8 8888         88.     '),nl,
+ 	write('       8. 8888.,8   88 8888         8b 8 8888      88           8 8888          88  8 8888 8 8888         8 8888          88     '),nl,
+	write('         8. 88888   88 8888         88 8 8888      88           8 8888          88  8 8888 8 888888888888 8 8888          88     '),nl,
+	write('          8. 8888   88 8888         88 8 8888      88           8 8888          88  8 8888 8 8888         8 8888          88     '),nl,
+	write('           8 8888   88 8888        ,8P 8 8888      88           8 8888         ,88  8 8888 8 8888         8 8888         ,88     '),nl,
+	write('           8 8888    8 8888       ,8P    8888     ,8P           8 8888        ,88   8 8888 8 8888         8 8888        ,88      '),nl,
+	write('           8 8888      8888     ,88      8888   ,d8P            8 8888    ,o88P     8 8888 8 8888         8 8888    ,o88P        '),nl,
+	write('           8 8888        8888888P          Y88888P              8 888888888P        8 8888 8 888888888888 8 888888888P           '),nl,nl,nl,nl.
 
 show_congratulation:-
+	/* Display congratulation screen */
 
 	nl,nl,nl,nl,nl,
-write('     ######   #######  ##    ##  ######   ########     ###    ######## ##     ## ##          ###    ######## ####  #######  ##    ##  ######      '),nl,
-write('    ##    ## ##     ## ###   ## ##    ##  ##     ##   ## ##      ##    ##     ## ##         ## ##      ##     ##  ##     ## ###   ## ##    ##     '),nl,
-write('    ##       ##     ## ####  ## ##        ##     ##  ##   ##     ##    ##     ## ##        ##   ##     ##     ##  ##     ## ####  ## ##           '),nl,
-write('    ##       ##     ## ## ## ## ##   #### ########  ##     ##    ##    ##     ## ##       ##     ##    ##     ##  ##     ## ## ## ##  ######      '),nl,
-write('    ##       ##     ## ##  #### ##    ##  ##   ##   #########    ##    ##     ## ##       #########    ##     ##  ##     ## ##  ####       ##     '),nl,
-write('    ##    ## ##     ## ##   ### ##    ##  ##    ##  ##     ##    ##    ##     ## ##       ##     ##    ##     ##  ##     ## ##   ### ##    ##     '),nl,
-write('     ######   #######  ##    ##  ######   ##     ## ##     ##    ##     #######  ######## ##     ##    ##    ####  #######  ##    ##  ######      '),nl,nl,nl.
+	write('     ######   #######  ##    ##  ######   ########     ###    ######## ##     ## ##          ###    ######## ####  #######  ##    ##  ######      '),nl,
+	write('    ##    ## ##     ## ###   ## ##    ##  ##     ##   ## ##      ##    ##     ## ##         ## ##      ##     ##  ##     ## ###   ## ##    ##     '),nl,
+	write('    ##       ##     ## ####  ## ##        ##     ##  ##   ##     ##    ##     ## ##        ##   ##     ##     ##  ##     ## ####  ## ##           '),nl,
+	write('    ##       ##     ## ## ## ## ##   #### ########  ##     ##    ##    ##     ## ##       ##     ##    ##     ##  ##     ## ## ## ##  ######      '),nl,
+	write('    ##       ##     ## ##  #### ##    ##  ##   ##   #########    ##    ##     ## ##       #########    ##     ##  ##     ## ##  ####       ##     '),nl,
+	write('    ##    ## ##     ## ##   ### ##    ##  ##    ##  ##     ##    ##    ##     ## ##       ##     ##    ##     ##  ##     ## ##   ### ##    ##     '),nl,
+	write('     ######   #######  ##    ##  ######   ##     ## ##     ##    ##     #######  ######## ##     ##    ##    ####  #######  ##    ##  ######      '),nl,nl,nl.
 	

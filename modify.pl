@@ -1,3 +1,4 @@
+
 /*** ====================        MODIFY FACT       ======================== ***/	
 
 modify_player_health(Change):- 
@@ -42,18 +43,21 @@ modify_player_weapon(New_weapon):-
 	
 modify_inventory(New_inventory):- 
 	/* rules to change inventory */
+	
 	player_inventory(Y),
 	retract(player_inventory(Y)),
 	asserta(player_inventory(New_inventory)).
 	
 modify_map_items(New_map_items):-
 	/* rules to change items on map */
+
 	map_items(C),
 	retract(map_items(C)),
 	asserta(map_items(New_map_items)).
 	
 modify_enemies(New_enemy_list):-
 	/* rules to change enemies on map */
+
 	enemies(C),
 	retract(enemies(C)),
 	asserta(enemies(New_enemy_list)).

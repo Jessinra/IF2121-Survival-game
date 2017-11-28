@@ -1,9 +1,9 @@
 
 /*** ====================         DECLARATION OF DYNAMIC FACT     =========================== ***/
 
-:- dynamic(game_running/1).	game_running(false).
-:- dynamic(game_type_set/1). game_type_set(false).
-:- dynamic(game_initialized/1). game_initialized(false).
+:- dynamic(game_running/1).			game_running(false).
+:- dynamic(game_type_set/1). 		game_type_set(false).
+:- dynamic(game_initialized/1). 	game_initialized(false).
 
 :- dynamic(player_health/1).		player_health(0).
 :- dynamic(player_hunger/1).		player_hunger(0). 
@@ -11,11 +11,11 @@
 :- dynamic(player_pos/2).			player_pos(0, 0). 
 :- dynamic(player_weapon/1).		player_weapon(bare_hand).
 :- dynamic(player_inventory/1).  	player_inventory([]).
-:- dynamic(map_width/1).		map_width(0). 
-:- dynamic(map_length/1).		map_length(0). 
-:- dynamic(map_items/1).		map_items(0).
-:- dynamic(enemies/1).			enemies(0).
-:- dynamic(special_terains/1).	special_terains(0).
+:- dynamic(map_width/1).			map_width(0). 
+:- dynamic(map_length/1).			map_length(0). 
+:- dynamic(map_items/1).			map_items(0).
+:- dynamic(enemies/1).				enemies(0).
+:- dynamic(special_terains/1).		special_terains(0).
 
 
 /*** ====================         INCLUDE OTHER FILE     =========================== ***/
@@ -35,7 +35,8 @@
 /*** ====================         MAIN FUNCITON     =========================== ***/
 
 
-start:-
+start:-	
+	/* Rules to start the game : not yet started */
 	
 	/* If game has not been run yet */	
 	game_running(false), !,			
@@ -49,12 +50,11 @@ start:-
 	
 	
 start:-
+	/* Rules to start the game : already started */
 
 	/* If game has already begun */
 	game_running(true),
 	write('Game has already begun !'), nl.
-	
-
 	
 
 quit:-
@@ -66,8 +66,3 @@ quit:-
 	write('2..'), nl, sleep(1),
 	write('1..'), nl, sleep(1),
 	halt.
-
-
-radar:-
-	modify_inventory([radar]).
-

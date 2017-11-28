@@ -1,3 +1,4 @@
+
 /*** ====================        SAVE AND LOAD       ======================== ***/
 
 load_game(Filename):-
@@ -52,6 +53,7 @@ load_game(Filename):-
 	close(Stream).
 
 	
+
 save_game(Filename):-
 	/* Function to save file */
 	

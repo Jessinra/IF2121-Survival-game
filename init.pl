@@ -2,6 +2,8 @@
 /***  ========================      INITIALIZATION        ======================== ***/
 
 
+/** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~          Declaration of constants             ~~~~~~~~~~~~~~~~~~~~~~~~~~**/
+
 amount(medicine, 25, 30).
 amount(food, 22, 27).
 amount(water, 21, 25).
@@ -20,7 +22,7 @@ amount(inventory, 0, 10).
 
 
 
-
+/** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~          Initialization section             ~~~~~~~~~~~~~~~~~~~~~~~~~~**/
 
 initPlayer:-
 	/* initialize player info */
@@ -31,6 +33,7 @@ initPlayer:-
 	WH1 is WH - 1,
 	WD1 is WD - 1,
 	
+	/* Get current conditions */
 	player_health(Health), 
 	player_hunger(Hunger), 
 	player_thirst(Thirst), 
@@ -38,6 +41,7 @@ initPlayer:-
 	player_weapon(Weapon),
 	player_inventory(Inventory),
 	
+	/* Remove current conditions */
 	retract(player_health(Health)),
 	retract(player_hunger(Hunger)),
 	retract(player_thirst(Thirst)),
@@ -45,6 +49,7 @@ initPlayer:-
 	retract(player_weapon(Weapon)),
 	retract(player_inventory(Inventory)),
 	
+	/* Initialize random value */
 	amount(player_init_hp, Init_hp_min, Init_hp_max), 
 	randomize,random(Init_hp_min, Init_hp_max, New_init_hp),
 	
@@ -57,6 +62,7 @@ initPlayer:-
 	randomize,random(2, WH1, Row), 
 	randomize,random(3, WD1, Col),
 	
+	/* Set random generated value into status */
 	asserta(player_health(New_init_hp)),
 	asserta(player_hunger(New_init_hunger)),
 	asserta(player_thirst(New_init_thirst)),
@@ -65,45 +71,54 @@ initPlayer:-
 	asserta(player_inventory([])).
 	
 	
+
 init:-
+	/* Rules to initialize game : game not started */
+
 	game_running(false),!,
-	
 	write('How about try to start. first ? :)'),nl.
 	
 init:-
-	/* General initialization */
+	/* Rules to initialize game : game started, not initialized */
+
 	game_running(true),!,
 	game_initialized(false),!,
-	
-	
+
 	retract(game_initialized(false)),
 	asserta(game_initialized(true)),
 	
+	/* General initialization */
 	set_object,
 	init_world, 
-	
-	
 	init_item_on_map,
 	init_enemy_on_map,
 	
 	save_game('cache.txt').
 	
 init:-
-	/* General initialization */
+	/* Rules to initialize game : game started, initialized */
+
 	game_running(true),!,
 	game_initialized(true),!,
 	
 	write('Your game has already begun !'),nl.
 	
+
+
+
+
 	
-/** ~~~~~~~~~~~~            game mode          ~~~~~~~~~~~ **/
+/** ~~~~~~~~~~~~~~~~~~~~~~~~~~            game mode          ~~~~~~~~~~~~~~~~~~~~~~~~~~~ **/
 
 cont:-
+	/* Continue last game : game not started */
+
 	game_type_set(false),
 	game_running(false),!,
 	write('How about starting the game first ? :) '),nl.
 	
 cont:-
+	/* Continue last game : game started, not initialized */
 
 	game_type_set(false),
 	game_running(true),!,
@@ -114,14 +129,21 @@ cont:-
 	init.
 
 cont:-
+	/* Continue last game : game started, initialized */
+
 	game_type_set(true),!,
 	write('You are already in game .... '),nl.	
 
+
 new_game:-
+	/* Create new game : game not started */
+
 	game_running(false),!,
 	write('How about starting the game first ? :) ').
 	
 new_game:-
+	/* Create new game : game started, not initialized */
+
 	game_running(true),!,
 	
 	nl,nl,nl,nl,write('~ Generating new world ~'),nl,sleep(3),nl,
@@ -131,7 +153,12 @@ new_game:-
 	init,
 	show_preface.
 
+
+
+/** ~~~~~~~~~~~~~~~~~~~~~~~~~~         in-game checking           ~~~~~~~~~~~~~~~~~~~~~~~~~~~ **/
+
 check_game_condition:-
+	/* Rules to check if player is dead caused of 0 health */
 
 	player_health(Health),
 	
@@ -141,7 +168,8 @@ check_game_condition:-
 	write('                                                            You\'ve lost too much blood...            '),!,sleep(5),quit.
 
 check_game_condition:-
-	
+	/* Rules to check if player is dead caused of 0 hunger */
+
 	player_hunger(Hunger),
 	
 	Hunger =< 0,!,
@@ -151,8 +179,10 @@ check_game_condition:-
 	write('                                                                You died due to hunger...            '),!,sleep(5),quit.
 	
 check_game_condition:-
-	
+	/* Rules to check if player is dead caused of 0 thirst */
+
 	player_thirst(Thirst),
+
 	Thirst =< 0,!,
 	write('                           Your vision slowly turns to black and you can\'t think of anything ... The last thing you felt was ...'), nl, sleep(2),
 	write('                                                                         save me...'), nl, sleep(2),
@@ -162,6 +192,7 @@ check_game_condition:-
 	
 	
 check_game_condition:-
+	/* Rules to check if no more enemies */
 	
 	enemies(Enemies),
 	
@@ -172,10 +203,5 @@ check_game_condition:-
 	write('                                 The horn signals that a victorious warrior has come out alive after the fierce battle...'),nl,nl,sleep(3),
 	write('                                                                You have won the Games!...            '),nl,!.
 
-check_game_condition:-
-	!.
-	
-	
-	
-	
-	
+check_game_condition :- !.
+	/* Check in game condition : basis */

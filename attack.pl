@@ -1,11 +1,14 @@
+
 /***  ========================       ATTACK        ======================== ***/
 
 
 attack:-  
+	/* rules for attacking enemy : using weapon and enemy found */
 
 	player_pos(Pos_row, Pos_col),
 	player_weapon(W),
     W \== bare_hands,
+
     enemy_on_map(EAtk, Pos_row, Pos_col),
 	enemies(Enemy_list),!,
 	
@@ -19,10 +22,12 @@ attack:-
 	check_game_condition.
 		  
 attack:-  
+	/* rules for attacking enemy : not using any weapon */
 	
 	player_pos(Pos_row, Pos_col),
 	player_weapon(W),
 	W == bare_hands,
+	
 	enemy_on_map(EAtk, Pos_row, Pos_col),!,
 	
 	modify_player_health(-EAtk),
@@ -31,6 +36,7 @@ attack:-
 	check_game_condition.
 	
 attack:-  
+	/* rules for attacking enemy : enemy not found */
 
 	player_pos(Pos_row, Pos_col),
 	\+ enemy_on_map(_, Pos_row, Pos_col),!,

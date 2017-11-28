@@ -1,7 +1,8 @@
+
 /***  ========================      MOVE          ======================== ***/
 
 w:- 
-	/* command to move left */
+	/* command to move left : fail condition */
 
 	player_pos(Pos_row, Pos_col),
 	Pos_new is Pos_col - 1,
@@ -26,7 +27,7 @@ w:-
 	check_game_condition.
 
 n:- 
-	/* command to move up */
+	/* command to move up : fail condition */
 	
 	player_pos(Pos_row, Pos_col),
 	Pos_new is Pos_row - 1,
@@ -51,7 +52,7 @@ n:-
 	check_game_condition.
 	
 e:- 
-	/* command to move right */
+	/* command to move right : fail condition */
 	
 	player_pos(Pos_row, Pos_col),
 	Pos_new is Pos_col + 1,
@@ -77,7 +78,7 @@ e:-
 	check_game_condition.
 
 s:- 
-	/* command to move down */
+	/* command to move down : fail condition */
 	
 	player_pos(Pos_row, Pos_col),
 	Pos_new is Pos_row + 1,
@@ -85,6 +86,7 @@ s:-
 	write('Seems I can\'t move there....\n'),nl,
 	modify_player_hunger(-1),
 	modify_player_thirst(-1),
+	
 	generate_enemy_movement,
 	check_game_condition.
 	
